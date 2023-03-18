@@ -269,6 +269,8 @@ rule-providers:
     interval: 86400
 rules:
   - RULE-SET,applications,DIRECT
+  - DOMAIN-KEYWORD,carbon,auto
+  - DOMAIN-KEYWORD,bing,auto
   - DOMAIN,clash.razord.top,DIRECT
   - DOMAIN,yacd.haishan.me,DIRECT
   - RULE-SET,private,DIRECT
