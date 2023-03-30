@@ -7,19 +7,22 @@ geox-url:
   geoip: "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
   geosite: "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat"
 global-client-fingerprint: chrome
+# interface-name: WLAN
+ipv6: false
+
 tun:
   enable: true
   device: meta              #MacOS建议删除此项
   stack: system             #system / gvisor / lwip liwp仅为1.13.2以上的功能
   dns-hijack:
-    - 'any:53'
-  auto-route: false
-  auto-detect-interface: false
+   - 198.18.0.2:53
+  auto-route: true
+  auto-detect-interface: true
   # mtu: 9000               #最大传输单元
   # strict_route: true      #将所有连接路由到tun来防止泄漏，但你的设备将无法其他设备被访问
-  inet4_route_address:      #启用 auto_route 时使用自定义路由而不是默认路由
-    - 0.0.0.0/1
-    - 128.0.0.0/1
+  # inet4_route_address:      #启用 auto_route 时使用自定义路由而不是默认路由
+  #   - 0.0.0.0/1
+  #   - 128.0.0.0/1
   # inet6_route_address:      #启用 auto_route 时使用自定义路由而不是默认路由
   #   - '::/1'
   #   - '8000::/1'
@@ -47,29 +50,39 @@ dns:
   enable: true # 是否启用dns false
   ipv6: false
   prefer-h3: true
-  listen: 127.0.0.1:53
-  enhanced-mode: redir-host # 模式：redir-host或fake-ip
+  listen: 0.0.0.0:1053
+  enhanced-mode: fake-ip # 模式：redir-host或fake-ip
   # use-hosts: true 
   fake-ip-range: 198.18.0.1/16
   default-nameserver: 
     - 223.5.5.5 # 阿里DNS
     - 8.8.8.8
-    - tls://223.5.5.5:853
+    # - tls://223.5.5.5:853
+  # nameserver-policy:
+  #  'www.baidu.com': '114.114.114.114'
+  #  '+.internal.crop.com': '10.0.0.1'
+  #  'geosite:cn': https://doh.pub/dns-query
+  #  'geosite:geolocation-!cn': [tls://8.8.4.4, https://1.0.0.1/dns-query]
+  #  "www.baidu.com,+.google.cn": [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
+  #  "geosite:private,apple": [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
   nameserver:
-    - https://doh.pub/dns-query
+    - 223.5.5.5
     - https://dns.alidns.com/dns-query
-    - tls://223.5.5.5:853 # 百度DNS
-    - 119.29.29.29 # 腾讯DNS
-    - 117.50.11.11 # ONE DNS拦截版 恶意网站拦截、广告过滤
-    - 117.50.10.10 # ONE DNS纯净版 直接返回其真实的响应结果
+    - 119.29.29.29
+    # - tls://223.5.5.5:853 # 百度DNS
   fallback:
+   - 8.8.8.8
    - https://1.1.1.1/dns-query
    - https://dns.google/dns-query
   fallback-filter:
-   geoip: true
-   geoip-code: CN
-   ipcidr:
-     - 240.0.0.0/4
+    geoip: true
+    geoip-code: CN
+    # ipcidr:
+    #   - 240.0.0.0/4
+    domain:
+      - '+.google.com'
+      - '+.facebook.com'
+      - '+.youtube.com'
   # 配置不使用 fake-ip 的域名
   fake-ip-filter:
     - "+.lan"
@@ -94,6 +107,9 @@ dns:
       # Windows
     - “+.msftconnecttest.com”
     - “+.msftncsi.com”
+    - "dns.msftncsi.com"
+    - "www.msftncsi.com"
+    - "www.msftconnecttest.com"
       # 中興路由器
     - zte.home
       # Stun Services
@@ -271,8 +287,11 @@ rules:
   - RULE-SET,applications,DIRECT
   - DOMAIN-KEYWORD,carbon,auto
   - DOMAIN-KEYWORD,bing,auto
+  - DOMAIN-SUFFIX,linuxcontainers.org,auto
+  - DOMAIN-SUFFIX,sourceforge.net,auto
   - DOMAIN,clash.razord.top,DIRECT
   - DOMAIN,yacd.haishan.me,DIRECT
+  # - SRC-IP-CIDR,198.18.0.1/8,auto
   - RULE-SET,private,DIRECT
   - RULE-SET,reject,REJECT
   - RULE-SET,icloud,DIRECT
