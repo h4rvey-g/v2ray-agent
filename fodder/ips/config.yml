@@ -294,6 +294,27 @@ rules:
   # - DOMAIN,sg.imedicaldoctor.net,REJECT
   - DOMAIN,spcnwikia.top,DIRECT
   # - SRC-IP-CIDR,198.18.0.1/8,auto
+  ############################# steam #############################
+  -  DOMAIN-SUFFIX,steamcontent.com,DIRECT
+  -  DOMAIN-SUFFIX,steamchina.com,DIRECT
+  -  DOMAIN,csgo.wmsj.cn,DIRECT
+  -  DOMAIN,dota2.wmsj.cn,DIRECT
+  -  DOMAIN,wmsjsteam.com,DIRECT
+  -  DOMAIN,dl.steam.clngaa.com,DIRECT
+  -  DOMAIN,dl.steam.ksyna.com,DIRECT
+  -  DOMAIN,st.dl.bscstorage.net,DIRECT
+  -  DOMAIN,st.dl.eccdnx.com,DIRECT
+  -  DOMAIN,st.dl.pinyuncloud.com,DIRECT
+  -  DOMAIN,steampipe.steamcontent.tnkjmec.com,DIRECT
+  -  DOMAIN,steampowered.com.8686c.com,DIRECT
+  -  DOMAIN,steamstatic.com.8686c.com,DIRECT
+  -  DOMAIN,steambroadcast.akamaized.net,DIRECT
+  -  DOMAIN,steamcdn-a.akamaihd.net,DIRECT
+  -  DOMAIN,steamcommunity-a.akamaihd.net,DIRECT
+  -  DOMAIN,steamstore-a.akamaihd.net,DIRECT
+  -  DOMAIN,steamusercontent-a.akamaihd.net,DIRECT
+  -  DOMAIN,steamuserimages-a.akamaihd.net,DIRECT
+  ############################# steam #############################
   - RULE-SET,private,DIRECT
   - RULE-SET,reject,REJECT
   - RULE-SET,icloud,DIRECT
