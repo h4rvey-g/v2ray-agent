@@ -58,8 +58,8 @@ dns:
     - 223.5.5.5 # 阿里DNS
     - 8.8.8.8
     # - tls://223.5.5.5:853
-  # nameserver-policy:
-  #  'www.baidu.com': '114.114.114.114'
+  nameserver-policy:
+   'spcnwikia.top': '223.5.5.5'
   #  '+.internal.crop.com': '10.0.0.1'
   #  'geosite:cn': https://doh.pub/dns-query
   #  'geosite:geolocation-!cn': [tls://8.8.4.4, https://1.0.0.1/dns-query]
@@ -291,6 +291,8 @@ rules:
   - DOMAIN-SUFFIX,sourceforge.net,auto
   - DOMAIN,clash.razord.top,DIRECT
   - DOMAIN,yacd.haishan.me,DIRECT
+  # - DOMAIN,sg.imedicaldoctor.net,REJECT
+  - DOMAIN,spcnwikia.top,DIRECT
   # - SRC-IP-CIDR,198.18.0.1/8,auto
   - RULE-SET,private,DIRECT
   - RULE-SET,reject,REJECT
