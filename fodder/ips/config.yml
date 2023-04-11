@@ -130,24 +130,50 @@ dns:
     - "+.mcdn.bilivideo.cn"
     - "*bili*"
 proxies:
+  # - name: "bart"
+  #   type: trojan
+  #   server: bart.howies.live
+  #   port: 1462
+  #   password: "a4e080df-c2aa-4c05-b759-6cd11bb59fc1"
+  #   tls: true
+  #   sni: bart.howies.live
+  #   alpn: 
+  #    - http/1.1
   - name: "bart"
-    type: trojan
-    server: bart.howies.live
-    port: 1462
-    password: "a4e080df-c2aa-4c05-b759-6cd11bb59fc1"
+    type: vless
+    server: 156.251.130.60
+    port: 1562
+    uuid: "a4e080df-c2aa-4c05-b759-6cd11bb59fc1"
+    network: tcp
     tls: true
-    sni: bart.howies.live
-    alpn: 
-     - http/1.1
+    # udp: true
+    flow: xtls-rprx-vision
+    servername: addons.mozilla.org
+    reality-opts:
+      public-key: kYeE-oaxiQgCfi7S8Jhino3qqrmcajwiQRPC30ZxCHQ
+    client-fingerprint: firefox # cannot be empty
+  # - name: "nerd"
+  #   type: trojan
+  #   server: homer.howies.live
+  #   port: 443
+  #   password: "7c72e318-0386-46f8-bfef-faa1956cf101"
+  #   sni: homer.howies.live
+  #   tls: true
+  #   alpn: 
+  #    - http/1.1
   - name: "nerd"
-    type: trojan
-    server: homer.howies.live
-    port: 443
-    password: "7c72e318-0386-46f8-bfef-faa1956cf101"
-    sni: homer.howies.live
+    type: vless
+    server: 198.211.6.60
+    port: 1562
+    uuid: "7c72e318-0386-46f8-bfef-faa1956cf101"
+    network: tcp
     tls: true
-    alpn: 
-     - http/1.1
+    udp: true
+    flow: xtls-rprx-vision
+    servername: addons.mozilla.org
+    reality-opts:
+      public-key: 2kGoqYzgdEChZ5I6b2NRtSlLMSaDCZhbxaJ1IrF2whg
+    client-fingerprint: firefox # cannot be empty
   - name: "bart_hysteria"
     type: hysteria
     server: bart.howies.live
@@ -286,6 +312,7 @@ rule-providers:
 rules:
   - RULE-SET,applications,DIRECT
   - DOMAIN-KEYWORD,carbon,auto
+  - DOMAIN,usegalaxy.org,DIRECT
   - DOMAIN-KEYWORD,bing,auto
   - DOMAIN-SUFFIX,linuxcontainers.org,auto
   - DOMAIN-SUFFIX,sourceforge.net,auto
@@ -331,4 +358,5 @@ rules:
 sub-rules:
   sub-browser:
   - DOMAIN-KEYWORD,openai,bart
+  - DOMAIN,usegalaxy.org,auto
   - MATCH,auto
