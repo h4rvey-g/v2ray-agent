@@ -311,6 +311,7 @@ rule-providers:
     interval: 86400
 rules:
   - RULE-SET,applications,DIRECT
+  - DOMAIN,gstatic.com,auto
   - DOMAIN-KEYWORD,carbon,auto
   - DOMAIN,usegalaxy.org,DIRECT
   - DOMAIN-KEYWORD,bing,auto
