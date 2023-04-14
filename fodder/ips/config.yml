@@ -15,7 +15,8 @@ tun:
   device: meta              #MacOS建议删除此项
   stack: system             #system / gvisor / lwip liwp仅为1.13.2以上的功能
   dns-hijack:
-   - 198.18.0.2:53
+    - any:53
+    - tcp://any:53
   auto-route: true
   auto-detect-interface: true
   # mtu: 9000               #最大传输单元
@@ -49,7 +50,7 @@ proxy-groups:
 dns:
   enable: true # 是否启用dns false
   ipv6: false
-  prefer-h3: true
+  # prefer-h3: true
   listen: 0.0.0.0:1053
   enhanced-mode: fake-ip # 模式：redir-host或fake-ip
   # use-hosts: true 
@@ -60,6 +61,7 @@ dns:
     # - tls://223.5.5.5:853
   nameserver-policy:
    'spcnwikia.top': '223.5.5.5'
+   'domain:xjtu.edu.cn': '223.5.5.5'
   #  '+.internal.crop.com': '10.0.0.1'
   #  'geosite:cn': https://doh.pub/dns-query
   #  'geosite:geolocation-!cn': [tls://8.8.4.4, https://1.0.0.1/dns-query]
@@ -311,7 +313,8 @@ rule-providers:
     interval: 86400
 rules:
   - RULE-SET,applications,DIRECT
-  - DOMAIN,gstatic.com,auto
+  ############################# 自定义 #############################
+  - GEOSITE,google,auto
   - DOMAIN-KEYWORD,carbon,auto
   - DOMAIN,usegalaxy.org,DIRECT
   - DOMAIN-KEYWORD,bing,auto
@@ -321,33 +324,34 @@ rules:
   - DOMAIN,yacd.haishan.me,DIRECT
   # - DOMAIN,sg.imedicaldoctor.net,REJECT
   - DOMAIN,spcnwikia.top,DIRECT
-  # - SRC-IP-CIDR,198.18.0.1/8,auto
+  - GEOSITE,category-games@cn,DIRECT
+  ##################################################################
   ############################# steam #############################
-  -  DOMAIN-SUFFIX,steamcontent.com,DIRECT
-  -  DOMAIN-SUFFIX,steamchina.com,DIRECT
-  -  DOMAIN,csgo.wmsj.cn,DIRECT
-  -  DOMAIN,dota2.wmsj.cn,DIRECT
-  -  DOMAIN,wmsjsteam.com,DIRECT
-  -  DOMAIN,dl.steam.clngaa.com,DIRECT
-  -  DOMAIN,dl.steam.ksyna.com,DIRECT
-  -  DOMAIN,st.dl.bscstorage.net,DIRECT
-  -  DOMAIN,st.dl.eccdnx.com,DIRECT
-  -  DOMAIN,st.dl.pinyuncloud.com,DIRECT
-  -  DOMAIN,steampipe.steamcontent.tnkjmec.com,DIRECT
-  -  DOMAIN,steampowered.com.8686c.com,DIRECT
-  -  DOMAIN,steamstatic.com.8686c.com,DIRECT
-  -  DOMAIN,steambroadcast.akamaized.net,DIRECT
-  -  DOMAIN,steamcdn-a.akamaihd.net,DIRECT
-  -  DOMAIN,steamcommunity-a.akamaihd.net,DIRECT
-  -  DOMAIN,steamstore-a.akamaihd.net,DIRECT
-  -  DOMAIN,steamusercontent-a.akamaihd.net,DIRECT
-  -  DOMAIN,steamuserimages-a.akamaihd.net,DIRECT
+  # -  DOMAIN-SUFFIX,steamcontent.com,DIRECT
+  # -  DOMAIN-SUFFIX,steamchina.com,DIRECT
+  # -  DOMAIN,csgo.wmsj.cn,DIRECT
+  # -  DOMAIN,dota2.wmsj.cn,DIRECT
+  # -  DOMAIN,wmsjsteam.com,DIRECT
+  # -  DOMAIN,dl.steam.clngaa.com,DIRECT
+  # -  DOMAIN,dl.steam.ksyna.com,DIRECT
+  # -  DOMAIN,st.dl.bscstorage.net,DIRECT
+  # -  DOMAIN,st.dl.eccdnx.com,DIRECT
+  # -  DOMAIN,st.dl.pinyuncloud.com,DIRECT
+  # -  DOMAIN,steampipe.steamcontent.tnkjmec.com,DIRECT
+  # -  DOMAIN,steampowered.com.8686c.com,DIRECT
+  # -  DOMAIN,steamstatic.com.8686c.com,DIRECT
+  # -  DOMAIN,steambroadcast.akamaized.net,DIRECT
+  # -  DOMAIN,steamcdn-a.akamaihd.net,DIRECT
+  # -  DOMAIN,steamcommunity-a.akamaihd.net,DIRECT
+  # -  DOMAIN,steamstore-a.akamaihd.net,DIRECT
+  # -  DOMAIN,steamusercontent-a.akamaihd.net,DIRECT
+  # -  DOMAIN,steamuserimages-a.akamaihd.net,DIRECT
   ############################# steam #############################
   - RULE-SET,private,DIRECT
   - RULE-SET,reject,REJECT
   - RULE-SET,icloud,DIRECT
   - RULE-SET,apple,DIRECT
-  # - RULE-SET,google,DIRECT
+  - RULE-SET,google,DIRECT
   - RULE-SET,proxy,auto
   - RULE-SET,direct,DIRECT
   - RULE-SET,lancidr,DIRECT
