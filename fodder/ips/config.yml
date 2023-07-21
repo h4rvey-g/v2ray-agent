@@ -144,16 +144,16 @@ proxies:
   - name: "bart"
     type: vless
     server: 156.251.130.60
-    port: 1562
-    uuid: "a4e080df-c2aa-4c05-b759-6cd11bb59fc1"
+    port: 11775
+    uuid: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
     network: tcp
     tls: true
-    # udp: true
+    udp: true
     flow: xtls-rprx-vision
-    servername: addons.mozilla.org
+    servername: www.microsoft.com
     reality-opts:
-      public-key: kYeE-oaxiQgCfi7S8Jhino3qqrmcajwiQRPC30ZxCHQ
-    client-fingerprint: firefox # cannot be empty
+      public-key: WR7nMA3mbTl5rFVTtYGM8ZcQElUZtWtiru3Li0sHGSc
+    client-fingerprint: chrome
   # - name: "nerd"
   #   type: trojan
   #   server: homer.howies.live
