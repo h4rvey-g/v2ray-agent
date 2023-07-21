@@ -180,26 +180,13 @@ proxies:
     type: hysteria
     server: bart.howies.live
     port: 10000
-    auth_str:  "a4e080df-c2aa-4c05-b759-6cd11bb59fc1" # 将会在未来某个时候删除
-    # auth-str: yourpassword
-    # obfs: obfs_str
+    auth_str: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
     alpn:
-      - h3
-    protocol: udp # 支持 udp/wechat-video/faketcp
-    up: "50 Mbps" # 若不写单位，默认为 Mbps
-    down: "100 Mbps" # 若不写单位，默认为 Mbps
+     - h3
+    protocol: udp
+    up: "50"
+    down: "100"
     sni: bart.howies.live
-    # skip-cert-verify: false
-    # recv_window_conn: 12582912 # 将会在未来某个时候删除
-    # recv-window-conn: 12582912
-    # recv_window: 52428800 # 将会在未来某个时候删除
-    # recv-window: 52428800
-    # ca: "./my.ca"
-    # ca_str: "xyz" # 将会在未来某个时候删除
-    # ca-str: "xyz"
-    # disable_mtu_discovery: false
-    # fingerprint: xxxx
-    # fast-open: true # 支持 TCP 快速打开，默认为 false
   - name: "nerd_hysteria"
     type: hysteria
     server: homer.howies.live
