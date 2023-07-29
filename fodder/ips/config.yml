@@ -180,7 +180,7 @@ proxies:
     type: hysteria
     server: bart.howies.live
     port: 10000
-    auth_str: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
+    auth_str: "a4e080df-c2aa-4c05-b759-6cd11bb59fc1"
     alpn:
      - h3
     protocol: udp
