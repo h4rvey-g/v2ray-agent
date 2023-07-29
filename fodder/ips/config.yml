@@ -35,7 +35,16 @@ listeners:
     rule: sub-browser
 proxy-groups:
   # url-test 将按照 url 测试结果使用延迟最低节点
-  - name: "auto"
+  - name: "auto_xray_only"
+    type: url-test
+    proxies:
+      - bart
+      - nerd
+    # tolerance: 150
+    # lazy: true
+    url: "https://cp.cloudflare.com/generate_204"
+    interval: 300
+  - name: "auto_all"
     type: url-test
     proxies:
       - bart
@@ -132,15 +141,6 @@ dns:
     - "+.mcdn.bilivideo.cn"
     - "*bili*"
 proxies:
-  # - name: "bart"
-  #   type: trojan
-  #   server: bart.howies.live
-  #   port: 1462
-  #   password: "a4e080df-c2aa-4c05-b759-6cd11bb59fc1"
-  #   tls: true
-  #   sni: bart.howies.live
-  #   alpn: 
-  #    - http/1.1
   - name: "bart"
     type: vless
     server: 156.251.130.60
@@ -154,15 +154,6 @@ proxies:
     reality-opts:
       public-key: WR7nMA3mbTl5rFVTtYGM8ZcQElUZtWtiru3Li0sHGSc
     client-fingerprint: chrome
-  # - name: "nerd"
-  #   type: trojan
-  #   server: homer.howies.live
-  #   port: 443
-  #   password: "7c72e318-0386-46f8-bfef-faa1956cf101"
-  #   sni: homer.howies.live
-  #   tls: true
-  #   alpn: 
-  #    - http/1.1
   - name: "nerd"
     type: vless
     server: 198.211.6.60
