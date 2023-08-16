@@ -63,14 +63,51 @@
     {
       "tag": "select",
       "type": "selector",
-      "default": "bart_hysteria",
-      "outbounds": ["bart_hysteria", "nerd_hysteria"]
+      "default": "bart",
+      "outbounds": ["bart", "nerd", "bart_hysteria", "nerd_hysteria"]
     },
     {
       "tag": "urltest",
       "type": "urltest",
       "interval": "5m",
-      "outbounds": ["bart_hysteria", "nerd_hysteria"]
+      "outbounds": ["bart", "nerd", "bart_hysteria", "nerd_hysteria"]
+    },
+    {
+      "type": "vless",
+      "uuid": "a4e080df-c2aa-4c05-b759-6cd11bb59fc1",
+      "flow": "xtls-rprx-vision",
+      "packet_encoding": "xudp",
+      "server": "bart.howies.live",
+      "server_port": 21990,
+      "tag": "bart",
+      "tls": {
+        "enabled": true,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        }
+      }
+    },
+    {
+      "server": "198.211.6.60",
+      "server_port": 1562,
+      "tag": "nerd",
+      "tls": {
+        "enabled": true,
+        "server_name": "addons.mozilla.org",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "firefox"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "2kGoqYzgdEChZ5I6b2NRtSlLMSaDCZhbxaJ1IrF2whg"
+        }
+      },
+      "type": "vless",
+      "uuid": "7c72e318-0386-46f8-bfef-faa1956cf101",
+      "flow": "xtls-rprx-vision",
+      "packet_encoding": "xudp"
     },
     {
       "server": "bart.howies.live",
