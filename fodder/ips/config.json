@@ -149,11 +149,11 @@
   ],
   "route": {
     "geoip": {
-      "download_url": "https://cdn.jsdelivr.net/gh/soffchen/sing-geoip@release/geoip.db"
-    },
-    "geosite": {
-      "download_url": "https://cdn.jsdelivr.net/gh/soffchen/sing-geosite@release/geosite.db"
-    },
+    //   "download_url": "https://cdn.jsdelivr.net/gh/soffchen/sing-geoip@release/geoip.db"
+    // },
+    // "geosite": {
+    //   "download_url": "https://cdn.jsdelivr.net/gh/soffchen/sing-geosite@release/geosite.db"
+    // },
     "rules": [
       {
         "protocol": "dns",
