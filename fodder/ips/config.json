@@ -94,7 +94,7 @@
         }
       },
       "type": "vless",
-      "uuid": "a4e080df",
+      "uuid": "a4e080df-c2aa-4c05-b759-6cd11bb59fc1",
       "flow": "xtls-rprx-vision",
       "packet_encoding": "xudp"
     },
@@ -111,7 +111,7 @@
         }
       },
       "type": "vless",
-      "uuid": "7c72e318",
+      "uuid": "7c72e318-0386-46f8-bfef-faa1956cf101",
       "flow": "xtls-rprx-vision",
       "packet_encoding": "xudp"
     },
@@ -125,7 +125,7 @@
         "alpn": ["h3"]
       },
       "type": "hysteria",
-      "auth_str": "a4e080df",
+      "auth_str": "a4e080df-c2aa-4c05-b759-6cd11bb59fc1",
       "down_mbps": 100,
       "up_mbps": 50
     },
@@ -139,7 +139,7 @@
         "alpn": ["h3"]
       },
       "type": "hysteria",
-      "auth_str": "c72e318",
+      "auth_str": "7c72e318-0386-46f8-bfef-faa1956cf101",
       "down": "100 Mbps",
       "up": "50 Mbps"
     },
