@@ -177,7 +177,7 @@
       },
       {
         "geosite": ["geolocation-!cn"],
-        "outbound": "urltest"
+        "outbound": "select"
       },
       {
         "geosite": ["cn", "private"],
