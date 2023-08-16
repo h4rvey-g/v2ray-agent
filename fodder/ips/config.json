@@ -63,7 +63,7 @@
     {
       "tag": "select",
       "type": "selector",
-      "default": "bart",
+      "default": "bart_hysteria",
       "outbounds": ["bart_hysteria", "nerd_hysteria"]
     },
     {
