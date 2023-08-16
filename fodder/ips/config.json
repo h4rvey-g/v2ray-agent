@@ -148,7 +148,7 @@
     }
   ],
   "route": {
-    "geoip": {
+    // "geoip": {
     //   "download_url": "https://cdn.jsdelivr.net/gh/soffchen/sing-geoip@release/geoip.db"
     // },
     // "geosite": {
