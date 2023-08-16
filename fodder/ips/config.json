@@ -103,11 +103,11 @@
         "utls": {
           "enabled": true,
           "fingerprint": "firefox"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "2kGoqYzgdEChZ5I6b2NRtSlLMSaDCZhbxaJ1IrF2whg"
         }
-      },
-      "reality": {
-        "enabled": true,
-        "public_key": "2kGoqYzgdEChZ5I6b2NRtSlLMSaDCZhbxaJ1IrF2whg"
       },
       "type": "vless",
       "uuid": "7c72e318-0386-46f8-bfef-faa1956cf101",
