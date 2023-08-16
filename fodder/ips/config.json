@@ -6,7 +6,7 @@
         "address": "1.1.1.1",
         "address_resolver": "dns_direct",
         "strategy": "ipv4_only",
-        "detour": "urltest"
+        "detour": "bart_hysteria"
       },
       {
         "tag": "dns_direct",
@@ -73,6 +73,10 @@
       "outbounds": ["bart", "nerd", "bart_hysteria", "nerd_hysteria"]
     },
     {
+      "type": "vless",
+      "uuid": "a4e080df-c2aa-4c05-b759-6cd11bb59fc1",
+      "flow": "xtls-rprx-vision",
+      "packet_encoding": "xudp",
       "server": "156.251.130.60",
       "server_port": 11775,
       "tag": "bart",
@@ -87,11 +91,7 @@
           "enabled": true,
           "public_key": "WR7nMA3mbTl5rFVTtYGM8ZcQElUZtWtiru3Li0sHGSc"
         }
-      },
-      "type": "vless",
-      "uuid": "a4e080df-c2aa-4c05-b759-6cd11bb59fc1",
-      "flow": "xtls-rprx-vision",
-      "packet_encoding": "xudp"
+      }
     },
     {
       "server": "198.211.6.60",
