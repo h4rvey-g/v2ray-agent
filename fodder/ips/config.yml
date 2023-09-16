@@ -300,7 +300,7 @@ rules:
   - DOMAIN-SUFFIX,sourceforge.net,auto_xray_only
   - DOMAIN,clash.razord.top,DIRECT
   - DOMAIN,yacd.haishan.me,DIRECT
-  - DOMAIN,spcnwikia.top,DIRECT
+  - DOMAIN-KEYWORD,spcnwiki,DIRECT
   # - DOMAIN,sg.imedicaldoctor.net,REJECT
   - DOMAIN,spcnwikia.top,DIRECT
   - GEOSITE,category-games@cn,DIRECT
