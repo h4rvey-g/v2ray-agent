@@ -292,6 +292,7 @@ rule-providers:
 rules:
   ############################# 自定义 #############################
   - GEOSITE,category-ads-all,REJECT
+  - GEOSITE,category-porn,REJECT
   - GEOSITE,google,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN,usegalaxy.org,DIRECT
