@@ -58,7 +58,7 @@ checkSystem() {
         removeType='yum -y remove'
         upgrade="yum update -y --skip-broken"
         checkCentosSELinux
-    elif [[ -f "/etc/issue" ]] && grep </etc/issue -q -i "debian" || [[ -f "/proc/version" ]] && grep </etc/issue -q -i "debian" ||  [[ -f "/etc/os-release" ]] && grep </etc/os-release -q -i "ID=debian"; then
+    elif [[ -f "/etc/issue" ]] && grep </etc/issue -q -i "debian" || [[ -f "/proc/version" ]] && grep </etc/issue -q -i "debian" || [[ -f "/etc/os-release" ]] && grep </etc/os-release -q -i "ID=debian"; then
         release="debian"
         installType='apt -y install'
         upgrade="apt update"
@@ -341,8 +341,7 @@ readInstallType() {
         fi
 
         if [[ -d "/etc/v2ray-agent/hysteria" && -f "/etc/v2ray-agent/hysteria/hysteria" ]]; then
-            # 这里检测 hysteria
-            if [[ -d "/etc/v2ray-agent/hysteria/conf" ]] && [[ -f "/etc/v2ray-agent/hysteria/conf/config.json" ]] && [[ -f "/etc/v2ray-agent/hysteria/conf/client_network.json" ]]; then
+            if [[ -d "/etc/v2ray-agent/hysteria/conf" ]] && [[ -f "/etc/v2ray-agent/hysteria/conf/config.json" ]]; then
                 hysteriaConfigPath=/etc/v2ray-agent/hysteria/conf/
             fi
         fi
@@ -503,12 +502,17 @@ getPublicIP() {
     if [[ -n "$1" ]]; then
         type=$1
     fi
-    local currentIP=
-    currentIP=$(curl -s "-${type}" http://www.cloudflare.com/cdn-cgi/trace | grep "ip" | awk -F "[=]" '{print $2}')
-    if [[ -z "${currentIP}" ]]; then
+    if [[ -n "${currentHost}" && -n "${currentRealityServerNames}" && "${currentRealityServerNames}" == "${currentHost}" && -z "$1" ]]; then
+        echo "${currentHost}"
+    else
+        local currentIP=
         currentIP=$(curl -s "-${type}" http://www.cloudflare.com/cdn-cgi/trace | grep "ip" | awk -F "[=]" '{print $2}')
+        if [[ -z "${currentIP}" && -z "$1" ]]; then
+            currentIP=$(curl -s "-6" http://www.cloudflare.com/cdn-cgi/trace | grep "ip" | awk -F "[=]" '{print $2}')
+        fi
+        echo "${currentIP}"
     fi
-    echo "${currentIP}"
+
 }
 
 # 输出ufw端口开放状态
@@ -534,11 +538,11 @@ checkFirewalldAllowPort() {
 # 读取hysteria网络环境
 readHysteriaConfig() {
     if [[ -n "${hysteriaConfigPath}" ]]; then
-        hysteriaLag=$(jq -r .hysteriaLag <"${hysteriaConfigPath}client_network.json")
-        hysteriaClientDownloadSpeed=$(jq -r .hysteriaClientDownloadSpeed <"${hysteriaConfigPath}client_network.json")
-        hysteriaClientUploadSpeed=$(jq -r .hysteriaClientUploadSpeed <"${hysteriaConfigPath}client_network.json")
+        #        hysteriaLag=$(jq -r .hysteriaLag <"${hysteriaConfigPath}client_network.json")
+        #        hysteriaClientDownloadSpeed=$(jq -r .hysteriaClientDownloadSpeed <"${hysteriaConfigPath}client_network.json")
+        #        hysteriaClientUploadSpeed=$(jq -r .hysteriaClientUploadSpeed <"${hysteriaConfigPath}client_network.json")
         hysteriaPort=$(jq -r .listen <"${hysteriaConfigPath}config.json" | awk -F "[:]" '{print $2}')
-        hysteriaProtocol=$(jq -r .protocol <"${hysteriaConfigPath}config.json")
+        #        hysteriaProtocol=$(jq -r .protocol <"${hysteriaConfigPath}config.json")
     fi
 }
 # 读取Tuic配置
@@ -923,7 +927,8 @@ installTools() {
                 echoContent red "  1.获取Github文件失败，请等待Github恢复后尝试，恢复进度可查看 [https://www.githubstatus.com/]"
                 echoContent red "  2.acme.sh脚本出现bug，可查看[https://github.com/acmesh-official/acme.sh] issues"
                 echoContent red "  3.如纯IPv6机器，请设置NAT64,可执行下方命令，如果添加下方命令还是不可用，请尝试更换其他NAT64"
-                echoContent skyBlue "  echo -e \"nameserver 2001:67c:2b0::4\\\nnameserver 2a00:1098:2c::1\" >> /etc/resolv.conf"
+                #                echoContent skyBlue "  echo -e \"nameserver 2001:67c:2b0::4\\\nnameserver 2a00:1098:2c::1\" >> /etc/resolv.conf"
+                echoContent skyBlue "  sed -i \"1i\\\nameserver 2001:67c:2b0::4\\\nnameserver 2a00:1098:2c::1\" /etc/resolv.conf"
                 exit 0
             fi
         fi
@@ -1028,13 +1033,16 @@ checkDNSIP() {
     local dnsIP=
     local type=4
     dnsIP=$(dig @1.1.1.1 +time=1 +short "${domain}")
+    if [[ -z "${dnsIP}" ]]; then
+        dnsIP=$(dig @8.8.8.8 +time=1 +short "${domain}")
+    fi
     if echo "${dnsIP}" | grep -q "timed out" || [[ -z "${dnsIP}" ]]; then
         echo
-        echoContent red " ---> 无法通过DNS获取域名IPv4地址"
-        echoContent green " ---> 尝试检查域名IPv6地址"
+        echoContent red " ---> 无法通过DNS获取域名 IPv4 地址"
+        echoContent green " ---> 尝试检查域名 IPv6 地址"
         dnsIP=$(dig @2606:4700:4700::1111 +time=1 aaaa +short "${domain}")
         type=6
-        if [[ -z "${dnsIP}" ]]; then
+        if echo "${dnsIP}" | grep -q "network unreachable" || [[ -z "${dnsIP}" ]]; then
             echoContent red " ---> 无法通过DNS获取域名IPv6地址，退出安装"
             exit 0
         fi
@@ -1042,13 +1050,14 @@ checkDNSIP() {
     local publicIP=
 
     publicIP=$(getPublicIP "${type}")
-
     if [[ "${publicIP}" != "${dnsIP}" ]]; then
         echoContent red " ---> 域名解析IP与当前服务器IP不一致\n"
         echoContent yellow " ---> 请检查域名解析是否生效以及正确"
         echoContent green " ---> 当前VPS IP：${publicIP}"
         echoContent green " ---> DNS解析 IP：${dnsIP}"
         exit 0
+    else
+        echoContent green " ---> 域名IP校验通过"
     fi
 }
 # 检查端口实际开放状态
@@ -1085,7 +1094,6 @@ EOF
     # 检查域名+端口的开放
     checkPortOpenResult=$(curl -s -m 2 "http://${domain}:${port}/checkPort")
     localIP=$(curl -s -m 2 "http://${domain}:${port}/ip")
-
     rm "${nginxConfigPath}checkPortOpen.conf"
     handleNginx stop
     if [[ "${checkPortOpenResult}" == "fjkvymb6len" ]]; then
@@ -1095,7 +1103,12 @@ EOF
         if echo "${checkPortOpenResult}" | grep -q "cloudflare"; then
             echoContent yellow " ---> 请关闭云朵后等待三分钟重新尝试"
         else
-            echoContent red " ---> 错误日志：${checkPortOpenResult}，如果日志不为空可以提交issue反馈"
+            if [[ -z "${checkPortOpenResult}" ]]; then
+                echoContent red " ---> 请检查是否有网页防火墙，比如Oracle等云服务商"
+                echoContent red " ---> 检查是否自己安装过nginx并且有配置冲突，可以尝试DD纯净系统后重新尝试"
+            else
+                echoContent red " ---> 错误日志：${checkPortOpenResult}，请将此错误日志通过issues提交反馈"
+            fi
         fi
         exit 0
     fi
@@ -1332,8 +1345,8 @@ checkIP() {
         if [[ -n ${localIP} ]]; then
             echoContent yellow " ---> 检测返回值异常，建议手动卸载nginx后重新执行脚本"
             echoContent red " ---> 异常结果：${localIP}"
-            exit 0
         fi
+        exit 0
     else
         if echo "${localIP}" | awk -F "[,]" '{print $2}' | grep -q "." || echo "${localIP}" | awk -F "[,]" '{print $2}' | grep -q ":"; then
             echoContent red "\n ---> 检测到多个ip，请确认是否关闭cloudflare的云朵"
@@ -1341,7 +1354,8 @@ checkIP() {
             echoContent yellow " ---> 检测到的ip如下:[${localIP}]"
             exit 0
         fi
-        echoContent green " ---> 当前域名ip为:[${localIP}]"
+        #        echoContent green " ---> 当前域名ip为:[${localIP}]"
+        echoContent green " ---> 检查当前域名IP正确"
     fi
 }
 # 自定义email
@@ -1888,18 +1902,14 @@ installHysteria() {
 
     if [[ -z "${hysteriaConfigPath}" ]]; then
 
-        version=$(curl -s https://api.github.com/repos/apernet/hysteria/releases?per_page=5 | jq -r '.[]|select (.prerelease==false)|.tag_name' | head -1)
+        version=$(curl -s "https://api.github.com/repos/apernet/hysteria/releases?per_page=10" | jq -r ".[]|select (.prerelease==${prereleaseStatus})|.tag_name" | grep "app/" | head -1)
 
         echoContent green " ---> Hysteria版本:${version}"
-        #        if wget --help | grep -q show-progress; then
         wget -c -q "${wgetShowProgressStatus}" -P /etc/v2ray-agent/hysteria/ "https://github.com/apernet/hysteria/releases/download/${version}/${hysteriaCoreCPUVendor}"
-        #        else
-        #            wget -c -P /etc/v2ray-agent/hysteria/ "https://github.com/apernet/hysteria/releases/download/${version}/${hysteriaCoreCPUVendor}" >/dev/null 2>&1
-        #        fi
         mv "/etc/v2ray-agent/hysteria/${hysteriaCoreCPUVendor}" /etc/v2ray-agent/hysteria/hysteria
         chmod 655 /etc/v2ray-agent/hysteria/hysteria
     else
-        echoContent green " ---> Hysteria版本:$(/etc/v2ray-agent/hysteria/hysteria --version | awk '{print $3}')"
+        echoContent green " ---> Hysteria版本:$(/etc/v2ray-agent/hysteria/hysteria version | grep "Version:" | awk '{print $2}')"
         read -r -p "是否更新、升级？[y/n]:" reInstallHysteriaStatus
         if [[ "${reInstallHysteriaStatus}" == "y" ]]; then
             rm -f /etc/v2ray-agent/hysteria/hysteria
@@ -1916,7 +1926,7 @@ installTuic() {
 
     if [[ -z "${tuicConfigPath}" ]]; then
 
-        version=$(curl -s https://api.github.com/repos/EAimTY/tuic/releases?per_page=5 | jq -r '.[]|select (.prerelease==false)|.tag_name' | head -1)
+        version=$(curl -s "https://api.github.com/repos/EAimTY/tuic/releases?per_page=1" | jq -r '.[]|select (.prerelease==false)|.tag_name')
 
         echoContent green " ---> Tuic版本:${version}"
         wget -c -q "${wgetShowProgressStatus}" -P /etc/v2ray-agent/tuic/ "https://github.com/EAimTY/tuic/releases/download/${version}/${version}${tuicCoreCPUVendor}"
@@ -1951,15 +1961,11 @@ installXray() {
 
     if [[ "${coreInstallType}" != "1" ]]; then
 
-        version=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases?per_page=10 | jq -r '.[]|select (.prerelease=='${prereleaseStatus}')|.tag_name' | head -1)
+        version=$(curl -s "https://api.github.com/repos/XTLS/Xray-core/releases?per_page=1" | jq -r ".[].tag_name")
 
         echoContent green " ---> Xray-core版本:${version}"
 
-        #        if wget --help | grep -q show-progress; then
         wget -c -q "${wgetShowProgressStatus}" -P /etc/v2ray-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip"
-        #        else
-        #            wget -c -P /etc/v2ray-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip" >/dev/null 2>&1
-        #        fi
         if [[ ! -f "/etc/v2ray-agent/xray/${xrayCoreCPUVendor}.zip" ]]; then
             echoContent red " ---> 核心下载失败，请重新尝试安装"
             exit 0
@@ -2067,10 +2073,10 @@ xrayVersionManageMenu() {
         echoContent yellow "2.不保证回退后一定可以正常使用"
         echoContent yellow "3.如果回退的版本不支持当前的config，则会无法连接，谨慎操作"
         echoContent skyBlue "------------------------Version-------------------------------"
-        curl -s https://api.github.com/repos/XTLS/Xray-core/releases | jq -r '.[]|select (.prerelease==false)|.tag_name' | head -5 | awk '{print ""NR""":"$0}'
+        curl -s "https://api.github.com/repos/XTLS/Xray-core/releases?per_page=5" | jq -r ".[]|select (.prerelease==false)|.tag_name" | awk '{print ""NR""":"$0}'
         echoContent skyBlue "--------------------------------------------------------------"
         read -r -p "请输入要回退的版本:" selectXrayVersionType
-        version=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases | jq -r '.[]|select (.prerelease==false)|.tag_name' | head -5 | awk '{print ""NR""":"$0}' | grep "${selectXrayVersionType}:" | awk -F "[:]" '{print $2}')
+        version=$(curl -s "https://api.github.com/repos/XTLS/Xray-core/releases?per_page=5" | jq -r ".[]|select (.prerelease==false)|.tag_name" | awk '{print ""NR""":"$0}' | grep "${selectXrayVersionType}:" | awk -F "[:]" '{print $2}')
         if [[ -n "${version}" ]]; then
             updateXray "${version}"
         else
@@ -2188,16 +2194,12 @@ updateXray() {
         if [[ -n "$1" ]]; then
             version=$1
         else
-            version=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases | jq -r ".[]|select (.prerelease==${prereleaseStatus})|.tag_name" | head -1)
+            version=$(curl -s "https://api.github.com/repos/XTLS/Xray-core/releases?per_page=1" | jq -r ".[]|select (.prerelease==${prereleaseStatus})|.tag_name")
         fi
 
         echoContent green " ---> Xray-core版本:${version}"
 
-        #        if wget --help | grep -q show-progress; then
         wget -c -q "${wgetShowProgressStatus}" -P /etc/v2ray-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip"
-        #        else
-        #            wget -c -P /etc/v2ray-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip" >/dev/null 2>&1
-        #        fi
 
         unzip -o "/etc/v2ray-agent/xray/${xrayCoreCPUVendor}.zip" -d /etc/v2ray-agent/xray >/dev/null
         rm -rf "/etc/v2ray-agent/xray/${xrayCoreCPUVendor}.zip"
@@ -2210,7 +2212,7 @@ updateXray() {
         if [[ -n "$1" ]]; then
             version=$1
         else
-            version=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases | jq -r ".[]|select (.prerelease==${prereleaseStatus})|.tag_name" | head -1)
+            version=$(curl -s "https://api.github.com/repos/XTLS/Xray-core/releases?per_page=1" | jq -r ".[].tag_name")
         fi
 
         if [[ -n "$1" ]]; then
@@ -2302,19 +2304,22 @@ installHysteriaService() {
     if [[ -n $(find /bin /usr/bin -name "systemctl") ]]; then
         rm -rf /etc/systemd/system/hysteria.service
         touch /etc/systemd/system/hysteria.service
-        execStart='/etc/v2ray-agent/hysteria/hysteria --log-level info -c /etc/v2ray-agent/hysteria/conf/config.json server'
+        execStart='/etc/v2ray-agent/hysteria/hysteria server -c /etc/v2ray-agent/hysteria/conf/config.json --log-level debug'
         cat <<EOF >/etc/systemd/system/hysteria.service
 [Unit]
-Description=Hysteria Service
-Documentation=https://github.com/apernet
 After=network.target nss-lookup.target
+
 [Service]
 User=root
-ExecStart=${execStart}
+WorkingDirectory=/root
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+ExecStart=/etc/v2ray-agent/hysteria/hysteria server -c /etc/v2ray-agent/hysteria/conf/config.json --log-level debug
 Restart=on-failure
-RestartPreventExitStatus=23
-LimitNPROC=10000
-LimitNOFILE=1000000
+RestartSec=10
+LimitNPROC=512
+LimitNOFILE=infinity
+
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -2828,38 +2833,43 @@ initHysteriaConfig() {
     echoContent skyBlue "\n进度 $1/${totalProgress} : 初始化Hysteria配置"
 
     initHysteriaPort
-    initHysteriaProtocol
-    initHysteriaNetwork
+    #    initHysteriaProtocol
+    #    initHysteriaNetwork
     local uuid=
     uuid=$(${ctlPath} uuid)
-    getClients "${configPath}${frontingType}.json" true
+    #    getClients "${configPath}${frontingType}.json" true
     cat <<EOF >/etc/v2ray-agent/hysteria/conf/config.json
 {
-	"listen": ":${hysteriaPort}",
-	"protocol": "${hysteriaProtocol}",
-	"disable_udp": false,
-	"cert": "/etc/v2ray-agent/tls/${currentHost}.crt",
-	"key": "/etc/v2ray-agent/tls/${currentHost}.key",
-	"auth": {
-		"mode": "passwords",
-		"config": []
-	},
-	"socks5_outbound":{
-	    "server":"127.0.0.1:31295",
-	    "user":"hysteria_socks5_outbound",
-	    "password":"${uuid}"
-	},
-	"alpn": "h3",
-	"recv_window_conn": 15728640,
-	"recv_window_client": 67108864,
-	"max_conn_client": 4096,
-	"disable_mtu_discovery": true,
-	"resolve_preference": "46",
-	"resolver": "https://8.8.8.8:443/dns-query"
+    "listen":":${hysteriaPort}",
+    "tls":{
+        "cert": "/etc/v2ray-agent/tls/${currentHost}.crt",
+        "key": "/etc/v2ray-agent/tls/${currentHost}.key"
+    },
+    "auth":{
+        "type": "password",
+        "password": "${uuid}"
+    },
+    "resolver":{
+      "type": "https",
+      "https":{
+        "addr": "1.1.1.1:443",
+        "timeout": "10s"
+      }
+    },
+    "outbounds":{
+      "name": "socks5_outbound",
+        "type": "socks5",
+        "socks5":{
+            "addr": "127.0.0.1:31295",
+            "username": "hysteria_socks5_outbound",
+            "password": "${uuid}"
+        }
+    }
 }
+
 EOF
 
-    addClientsHysteria "/etc/v2ray-agent/hysteria/conf/config.json" true
+    #    addClientsHysteria "/etc/v2ray-agent/hysteria/conf/config.json" true
 
     # 添加socks入站
     cat <<EOF >${configPath}/02_socks_inbounds_hysteria.json
@@ -3530,7 +3540,8 @@ EOF
       {
         "type": "field",
         "domain": [
-          "domain:gstatic.com"
+          "domain:gstatic.com",
+          "domain:googleapis.com"
         ],
         "outboundTag": "direct"
       }
@@ -3781,7 +3792,8 @@ EOF
             "publicKey": "${realityPublicKey}",
             "maxTimeDiff": 70000,
             "shortIds": [
-                ""
+                "",
+                "6ba85179e30d4fc2"
             ]
         }
       }
@@ -4053,80 +4065,47 @@ EOF
         echoContent green "    https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=trojan%3a%2f%2f${id}%40${add}%3a${currentDefaultPort}%3Fencryption%3Dnone%26fp%3Dchrome%26security%3Dtls%26peer%3d${currentHost}%26type%3Dgrpc%26sni%3d${currentHost}%26path%3D${currentPath}trojangrpc%26alpn%3Dh2%26serviceName%3D${currentPath}trojangrpc%23${email}\n"
 
     elif [[ "${type}" == "hysteria" ]]; then
-        local hysteriaEmail=
-        hysteriaEmail=$(echo "${email}" | awk -F "[-]" '{print $1}')_hysteria
+        #        local hysteriaEmail=
+        #        hysteriaEmail=$(echo "${email}" | awk -F "[-]" '{print $1}')_hysteria
         echoContent yellow " ---> Hysteria(TLS)"
-        local clashMetaPortTmp="port: ${hysteriaPort}"
-        local v2rayNPortHopping=
-        local mport=
-        if [[ -n "${portHoppingStart}" ]]; then
-            mport="mport=${portHoppingStart}-${portHoppingEnd}&"
-            clashMetaPortTmp="ports: ${portHoppingStart}-${portHoppingEnd}"
-            v2rayNPortHopping=",${portHoppingStart}-${portHoppingEnd}"
-        fi
-        echoContent green "    hysteria://${currentHost}:${hysteriaPort}?${mport}protocol=${hysteriaProtocol}&auth=${id}&peer=${currentHost}&insecure=0&alpn=h3&upmbps=${hysteriaClientUploadSpeed}&downmbps=${hysteriaClientDownloadSpeed}#${hysteriaEmail}\n"
-        cat <<EOF >>"/etc/v2ray-agent/subscribe_local/default/${user}"
-hysteria://${currentHost}:${hysteriaPort}?${mport}protocol=${hysteriaProtocol}&auth=${id}&peer=${currentHost}&insecure=0&alpn=h3&upmbps=${hysteriaClientUploadSpeed}&downmbps=${hysteriaClientDownloadSpeed}#${hysteriaEmail}
-EOF
+
+        echoContent green "    hysteria2://${id}@${currentHost}:${hysteriaPort}?peer=${currentHost}&insecure=0&sni=${currentHost}&alpn=h3#hysteria2\n"
+#        cat <<EOF >>"/etc/v2ray-agent/subscribe_local/default/${user}"
+#hysteria2://${id}@${currentHost}:${hysteriaPort}?peer=${currentHost}&insecure=0&sni=${currentHost}&alpn=h3#hysteria2
+#EOF
         echoContent yellow " ---> v2rayN(hysteria+TLS)"
         cat <<EOF >"/etc/v2ray-agent/hysteria/conf/client.json"
 {
-  "server": "${currentHost}:${hysteriaPort}${v2rayNPortHopping}",
-  "protocol": "${hysteriaProtocol}",
-  "up_mbps": ${hysteriaClientUploadSpeed},
-  "down_mbps": ${hysteriaClientDownloadSpeed},
-  "http": { "listen": "127.0.0.1:10809", "timeout": 300, "disable_udp": false },
-  "socks5": { "listen": "127.0.0.1:10808", "timeout": 300, "disable_udp": false },
-  "obfs": "",
-  "auth_str":"${id}",
-  "alpn": "h3",
-  "acl": "acl/routes.acl",
-  "mmdb": "acl/Country.mmdb",
-  "server_name": "${currentHost}",
-  "insecure": false,
-  "recv_window_conn": 5767168,
-  "recv_window": 23068672,
-  "disable_mtu_discovery": true,
-  "resolver": "https://223.5.5.5/dns-query",
-  "retry": 3,
-  "retry_interval": 3,
-  "quit_on_disconnect": false,
-  "handshake_timeout": 15,
-  "idle_timeout": 30,
-  "fast_open": true,
-  "hop_interval": 120
+  "server": "${currentHost}:${hysteriaPort}",
+  "socks5": { "listen": "127.0.0.1:10808", "timeout": 300},
+  "auth":"${id}",
+  "tls":{
+    "sni":"${currentHost}"
+  }
 }
 EOF
         local v2rayNConf=
         v2rayNConf="$(cat /etc/v2ray-agent/hysteria/conf/client.json)"
         echoContent green "${v2rayNConf}\n"
 
-        cat <<EOF >>"/etc/v2ray-agent/subscribe_local/clashMeta/${user}"
-  - name: "${hysteriaEmail}"
-    type: hysteria
-    server: ${currentHost}
-    ${clashMetaPortTmp}
-    auth_str: ${id}
-    alpn:
-     - h3
-    protocol: ${hysteriaProtocol}
-    up: "${hysteriaClientUploadSpeed}"
-    down: "${hysteriaClientDownloadSpeed}"
-    sni: ${currentHost}
-EOF
+#        cat <<EOF >>"/etc/v2ray-agent/subscribe_local/clashMeta/${user}"
+#  - name: hysteria2
+#    type: hysteria2
+#    server: ${currentHost}
+#    port: ${hysteriaPort}
+#    password: ${id}
+#    sni: ${currentHost}
+#EOF
         echoContent yellow " ---> 二维码 Hysteria(TLS)"
-        if [[ -n "${mport}" ]]; then
-            mport="mport%3D${portHoppingStart}-${portHoppingEnd}%26"
-        fi
-        echoContent green "    https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=hysteria%3A%2F%2F${currentHost}%3A${hysteriaPort}%3F${mport}protocol%3D${hysteriaProtocol}%26auth%3D${id}%26peer%3D${currentHost}%26insecure%3D0%26alpn%3Dh3%26upmbps%3D${hysteriaClientUploadSpeed}%26downmbps%3D${hysteriaClientDownloadSpeed}%23${hysteriaEmail}\n"
+        echoContent green "    https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=hysteria2%3A%2F%2F${id}%40${currentHost}%3A${hysteriaPort}%3Fpeer%3D${currentHost}%26insecure%3D0%26sni%3D${currentHost}%26alpn%3Dh3%23hysteria2\n"
     elif [[ "${type}" == "vlessReality" ]]; then
         echoContent yellow " ---> 通用格式(VLESS+reality+uTLS+Vision)"
-        echoContent green "    vless://${id}@$(getPublicIP):${currentRealityPort}?encryption=none&security=reality&type=tcp&sni=${currentRealityServerNames}&fp=chrome&pbk=${currentRealityPublicKey}&flow=xtls-rprx-vision#${email}\n"
+        echoContent green "    vless://${id}@$(getPublicIP):${currentRealityPort}?encryption=none&security=reality&type=tcp&sni=${currentRealityServerNames}&fp=chrome&pbk=${currentRealityPublicKey}&sid=6ba85179e30d4fc2&flow=xtls-rprx-vision#${email}\n"
 
         echoContent yellow " ---> 格式化明文(VLESS+reality+uTLS+Vision)"
-        echoContent green "协议类型:VLESS reality，地址:$(getPublicIP)，publicKey:${currentRealityPublicKey}，serverNames：${currentRealityServerNames}，端口:${currentRealityPort}，用户ID:${id}，传输方式:tcp，账户名:${email}\n"
+        echoContent green "协议类型:VLESS reality，地址:$(getPublicIP)，publicKey:${currentRealityPublicKey}，shortId: 6ba85179e30d4fc2,serverNames：${currentRealityServerNames}，端口:${currentRealityPort}，用户ID:${id}，传输方式:tcp，账户名:${email}\n"
         cat <<EOF >>"/etc/v2ray-agent/subscribe_local/default/${user}"
-vless://${id}@$(getPublicIP):${currentRealityPort}?encryption=none&security=reality&type=tcp&sni=${currentRealityServerNames}&fp=chrome&pbk=${currentRealityPublicKey}&flow=xtls-rprx-vision#${email}
+vless://${id}@$(getPublicIP):${currentRealityPort}?encryption=none&security=reality&type=tcp&sni=${currentRealityServerNames}&fp=chrome&pbk=${currentRealityPublicKey}&sid=6ba85179e30d4fc2&flow=xtls-rprx-vision#${email}
 EOF
         cat <<EOF >>"/etc/v2ray-agent/subscribe_local/clashMeta/${user}"
   - name: "${email}"
@@ -4141,19 +4120,20 @@ EOF
     servername: ${currentRealityServerNames}
     reality-opts:
       public-key: ${currentRealityPublicKey}
+      short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome
 EOF
         echoContent yellow " ---> 二维码 VLESS(VLESS+reality+uTLS+Vision)"
-        echoContent green "    https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=vless%3A%2F%2F${id}%40$(getPublicIP)%3A${currentRealityPort}%3Fencryption%3Dnone%26security%3Dreality%26type%3Dtcp%26sni%3D${currentRealityServerNames}%26fp%3Dchrome%26pbk%3D${currentRealityPublicKey}%26flow%3Dxtls-rprx-vision%23${email}\n"
+        echoContent green "    https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=vless%3A%2F%2F${id}%40$(getPublicIP)%3A${currentRealityPort}%3Fencryption%3Dnone%26security%3Dreality%26type%3Dtcp%26sni%3D${currentRealityServerNames}%26fp%3Dchrome%26pbk%3D${currentRealityPublicKey}%26sid%3D6ba85179e30d4fc2%26flow%3Dxtls-rprx-vision%23${email}\n"
 
     elif [[ "${type}" == "vlessRealityGRPC" ]]; then
         echoContent yellow " ---> 通用格式(VLESS+reality+uTLS+gRPC)"
-        echoContent green "    vless://${id}@$(getPublicIP):${currentRealityPort}?encryption=none&security=reality&type=grpc&sni=${currentRealityServerNames}&fp=chrome&pbk=${currentRealityPublicKey}&path=grpc&serviceName=grpc#${email}\n"
+        echoContent green "    vless://${id}@$(getPublicIP):${currentRealityPort}?encryption=none&security=reality&type=grpc&sni=${currentRealityServerNames}&fp=chrome&pbk=${currentRealityPublicKey}&sid=6ba85179e30d4fc2&path=grpc&serviceName=grpc#${email}\n"
 
         echoContent yellow " ---> 格式化明文(VLESS+reality+uTLS+gRPC)"
-        echoContent green "协议类型:VLESS reality，serviceName:grpc，地址:$(getPublicIP)，publicKey:${currentRealityPublicKey}，serverNames：${currentRealityServerNames}，端口:${currentRealityPort}，用户ID:${id}，传输方式:gRPC，client-fingerprint：chrome，账户名:${email}\n"
+        echoContent green "协议类型:VLESS reality，serviceName:grpc，地址:$(getPublicIP)，publicKey:${currentRealityPublicKey}，shortId: 6ba85179e30d4fc2，serverNames：${currentRealityServerNames}，端口:${currentRealityPort}，用户ID:${id}，传输方式:gRPC，client-fingerprint：chrome，账户名:${email}\n"
         cat <<EOF >>"/etc/v2ray-agent/subscribe_local/default/${user}"
-vless://${id}@$(getPublicIP):${currentRealityPort}?encryption=none&security=reality&type=grpc&sni=${currentRealityServerNames}&fp=chrome&pbk=${currentRealityPublicKey}&path=grpc&serviceName=grpc#${email}
+vless://${id}@$(getPublicIP):${currentRealityPort}?encryption=none&security=reality&type=grpc&sni=${currentRealityServerNames}&fp=chrome&pbk=${currentRealityPublicKey}&sid=6ba85179e30d4fc2&path=grpc&serviceName=grpc#${email}
 EOF
         cat <<EOF >>"/etc/v2ray-agent/subscribe_local/clashMeta/${user}"
   - name: "${email}"
@@ -4167,12 +4147,13 @@ EOF
     servername: ${currentRealityServerNames}
     reality-opts:
       public-key: ${currentRealityPublicKey}
+      short-id: 6ba85179e30d4fc2
     grpc-opts:
       grpc-service-name: "grpc"
     client-fingerprint: chrome
 EOF
         echoContent yellow " ---> 二维码 VLESS(VLESS+reality+uTLS+gRPC)"
-        echoContent green "    https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=vless%3A%2F%2F${id}%40$(getPublicIP)%3A${currentRealityPort}%3Fencryption%3Dnone%26security%3Dreality%26type%3Dgrpc%26sni%3D${currentRealityServerNames}%26fp%3Dchrome%26pbk%3D${currentRealityPublicKey}%26path%3Dgrpc%26serviceName%3Dgrpc%23${email}\n"
+        echoContent green "    https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=vless%3A%2F%2F${id}%40$(getPublicIP)%3A${currentRealityPort}%3Fencryption%3Dnone%26security%3Dreality%26type%3Dgrpc%26sni%3D${currentRealityServerNames}%26fp%3Dchrome%26pbk%3D${currentRealityPublicKey}%26pbk%3D6ba85179e30d4fc2%26path%3Dgrpc%26serviceName%3Dgrpc%23${email}\n"
     elif [[ "${type}" == "tuic" ]]; then
 
         if [[ -z "${email}" ]]; then
@@ -4362,27 +4343,28 @@ showAccounts() {
     fi
     if echo ${currentInstallProtocolType} | grep -q 6; then
         echoContent skyBlue "\n================================  Hysteria TLS  ================================\n"
-        echoContent red "\n --->Hysteria速度依赖与本地的网络环境，如果被QoS使用体验会非常差。IDC也有可能认为是攻击，请谨慎使用"
+        #        echoContent red "\n --->Hysteria速度依赖与本地的网络环境，如果被QoS使用体验会非常差。IDC也有可能认为是攻击，请谨慎使用"
 
-        jq .auth.config ${hysteriaConfigPath}config.json | jq -r '.[]' | while read -r user; do
-            local defaultUser=
-            local uuidType=
-            uuidType=".id"
+        jq -r .auth.password ${hysteriaConfigPath}config.json | while read -r user; do
+            #            local defaultUser=
+            #            local uuidType=
+            #            uuidType=".id"
+            #
+            #            if [[ "${frontingType}" == "02_trojan_TCP_inbounds" ]]; then
+            #                uuidType=".password"
+            #            fi
 
-            if [[ "${frontingType}" == "02_trojan_TCP_inbounds" ]]; then
-                uuidType=".password"
-            fi
+            #            defaultUser=$(jq '.inbounds[0].settings.clients[]|select('${uuidType}'=="'"${user}"'")' ${configPath}${frontingType}.json)
+            #            local email=
+            #            email=$(echo "${defaultUser}" | jq -r .email)
+            #            local hysteriaEmail=
+            #            hysteriaEmail=$(echo "${email}" | awk -F "[_]" '{print $1}')_hysteria
 
-            defaultUser=$(jq '.inbounds[0].settings.clients[]|select('${uuidType}'=="'"${user}"'")' ${configPath}${frontingType}.json)
-            local email=
-            email=$(echo "${defaultUser}" | jq -r .email)
-            local hysteriaEmail=
-            hysteriaEmail=$(echo "${email}" | awk -F "[_]" '{print $1}')_hysteria
-
-            if [[ -n ${defaultUser} ]]; then
-                echoContent skyBlue "\n ---> 账号:$(echo "${hysteriaEmail}" | awk -F "[-]" '{print $1"_hysteria"}')"
+            if [[ -n ${user} ]]; then
+                #                echoContent skyBlue "\n ---> 账号:$(echo "${hysteriaEmail}" | awk -F "[-]" '{print $1"_hysteria"}')"
+                echoContent skyBlue "\n ---> 账号:hysteria2"
                 echo
-                defaultBase64Code hysteria "${hysteriaEmail}" "${user}"
+                defaultBase64Code hysteria hysteria2 "${user}"
             fi
 
         done
@@ -6661,8 +6643,8 @@ customXrayInstall() {
         updateRedirectNginxConf
         handleNginx start
 
-        # 安装V2Ray
-        installXray 7 true
+        # 安装Xray
+        installXray 7 false
         installXrayService 8
         initXrayConfig custom 9
         cleanUp v2rayDel
@@ -6777,7 +6759,7 @@ xrayCoreInstall() {
     handleNginx stop
     randomPathFunction 5
     # 安装Xray
-    installXray 6 true
+    installXray 6 false
     installXrayService 7
     customCDNIP 8
     initXrayConfig all 9
@@ -7597,13 +7579,27 @@ initRealityKey() {
     echoContent green "\n privateKey:${realityPrivateKey}"
     echoContent green "\n publicKey:${realityPublicKey}"
 }
+# 检查reality域名是否符合
+checkRealityDest() {
+    local traceResult=
+    traceResult=$(curl -s "https://$(echo "${realityDestDomain}" | cut -d ':' -f 1)/cdn-cgi/trace" | grep "visit_scheme=https")
+    if [[ -n "${traceResult}" ]]; then
+        echoContent red "\n ---> 检测到使用的域名，托管在cloudflare并开启了代理，使用此类型域名可能导致VPS流量被其他人使用[不建议使用]\n"
+        read -r -p "是否继续 ？[y/n]" setRealityDestStatus
+        if [[ "${setRealityDestStatus}" != 'y' ]]; then
+            exit 0
+        fi
+        echoContent yellow "\n ---> 忽略风险，继续使用"
+    fi
+}
+
 # 初始化reality dest
 initRealityDest() {
     if [[ -n "${domain}" ]]; then
         realityDestDomain=${domain}:${port}
     else
         local realityDestDomainList=
-        realityDestDomainList="gateway.icloud.com,itunes.apple.com,download-installer.cdn.mozilla.net,addons.mozilla.org,www.lovelive-anime.jp,www.speedtest.net,www.speedtest.org,swdist.apple.com,swcdn.apple.com,updates.cdn-apple.com,mensura.cdn-apple.com,osxapps.itunes.apple.com,aod.itunes.apple.com,s0.awsstatic.com,d1.awsstatic.com,images-na.ssl-images-amazon.com,m.media-amazon.com,player.live-video.net"
+        realityDestDomainList="gateway.icloud.com,itunes.apple.com,swdist.apple.com,swcdn.apple.com,updates.cdn-apple.com,mensura.cdn-apple.com,osxapps.itunes.apple.com,aod.itunes.apple.com,download-installer.cdn.mozilla.net,addons.mozilla.org,s0.awsstatic.com,d1.awsstatic.com,images-na.ssl-images-amazon.com,m.media-amazon.com,player.live-video.net,one-piece.com,lol.secure.dyn.riotcdn.net,www.lovelive-anime.jp,www.nokia.com"
 
         echoContent skyBlue "\n===== 生成配置回落的域名 例如:[addons.mozilla.org:443] ======\n"
         echoContent green "回落域名列表：https://www.v2ray-agent.com/archives/1680104902581#heading-8\n"
@@ -7617,6 +7613,7 @@ initRealityDest() {
             echoContent red "\n ---> 域名不合规范，请重新输入"
             initRealityDest
         else
+            checkRealityDest
             echoContent yellow "\n ---> 回落域名: ${realityDestDomain}"
         fi
     fi
@@ -7714,7 +7711,7 @@ xrayCoreRealityInstall() {
     # 下载核心
     #    prereleaseStatus=true
     #    updateXray
-    installXray 3 true
+    installXray 3 false
     # 生成 privateKey、配置回落地址、配置serverNames
     installXrayService 6
     # initXrayRealityConfig 5
@@ -7763,9 +7760,9 @@ manageHysteria() {
     if [[ -n "${hysteriaConfigPath}" ]]; then
         echoContent yellow "1.重新安装"
         echoContent yellow "2.卸载"
-        echoContent yellow "3.端口跳跃管理"
-        echoContent yellow "4.core管理"
-        echoContent yellow "5.查看日志"
+        #        echoContent yellow "3.端口跳跃管理"
+        echoContent yellow "3.core管理"
+        echoContent yellow "4.查看日志"
         hysteriaStatus=true
     else
         echoContent yellow "1.安装"
@@ -7777,11 +7774,11 @@ manageHysteria() {
         hysteriaCoreInstall
     elif [[ "${installHysteriaStatus}" == "2" && "${hysteriaStatus}" == "true" ]]; then
         unInstallHysteriaCore
+        #    elif [[ "${installHysteriaStatus}" == "3" && "${hysteriaStatus}" == "true" ]]; then
+        #        hysteriaPortHoppingMenu
     elif [[ "${installHysteriaStatus}" == "3" && "${hysteriaStatus}" == "true" ]]; then
-        hysteriaPortHoppingMenu
-    elif [[ "${installHysteriaStatus}" == "4" && "${hysteriaStatus}" == "true" ]]; then
         hysteriaVersionManageMenu 1
-    elif [[ "${installHysteriaStatus}" == "5" && "${hysteriaStatus}" == "true" ]]; then
+    elif [[ "${installHysteriaStatus}" == "4" && "${hysteriaStatus}" == "true" ]]; then
         journalctl -fu hysteria
     fi
 }
@@ -7872,11 +7869,10 @@ tuicVersionManageMenu() {
 }
 # 主菜单
 menu() {
-
     cd "$HOME" || exit
     echoContent red "\n=============================================================="
     echoContent green "作者：mack-a"
-    echoContent green "当前版本：v2.10.5"
+    echoContent green "当前版本：v2.10.22"
     echoContent green "Github：https://github.com/mack-a/v2ray-agent"
     echoContent green "描述：八合一共存脚本\c"
     showInstallStatus
