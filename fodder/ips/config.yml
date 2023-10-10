@@ -71,6 +71,11 @@ dns:
   nameserver-policy:
    'spcnwikia.top': '223.5.5.5'
    'domain:xjtu.edu.cn': '223.5.5.5'
+   'geosite:openai': 'https://dns.google/dns-query'
+   'geosite:microsoft': 'https://dns.google/dns-query'
+   'geosite:msn': 'https://dns.google/dns-query'
+   'geosite:bing': 'https://dns.google/dns-query'
+   'bingapis.com': 'https://dns.google/dns-query'
   #  '+.internal.crop.com': '10.0.0.1'
   #  'geosite:cn': https://doh.pub/dns-query
   #  'geosite:geolocation-!cn': [tls://8.8.4.4, https://1.0.0.1/dns-query]
@@ -297,7 +302,8 @@ rules:
   - GEOSITE,google,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN,usegalaxy.org,DIRECT
-  - DOMAIN-KEYWORD,bing,auto_xray_only
+  - DOMAIN-KEYWORD,bing,nerd
+  - GEOSITE,bing,nerd
   - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
   - DOMAIN-SUFFIX,sourceforge.net,auto_xray_only
   - DOMAIN,clash.razord.top,DIRECT
