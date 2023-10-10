@@ -302,8 +302,8 @@ rules:
   - GEOSITE,google,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN,usegalaxy.org,DIRECT
-  - DOMAIN-KEYWORD,bing,nerd
-  - GEOSITE,bing,nerd
+  - DOMAIN-KEYWORD,bing,nerd_hysteria
+  - GEOSITE,bing,nerd_hysteria
   - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
   - DOMAIN-SUFFIX,sourceforge.net,auto_xray_only
   - DOMAIN,clash.razord.top,DIRECT
