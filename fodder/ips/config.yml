@@ -298,6 +298,7 @@ rules:
   ############################# 自定义 #############################
   - GEOSITE,category-ads-all,REJECT
   - GEOSITE,category-porn,REJECT
+  - GEOSITE,openai,bart_hysteria
   - GEOSITE,apple-cn,DIRECT
   - GEOSITE,google,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
