@@ -7,13 +7,14 @@
 - [VPS选购攻略，避坑指南](https://www.v2ray-agent.com/archives/1679975663984)
 - [TG频道](https://t.me/v2rayAgentChannel)、[TG群组](https://t.me/technologyshare)、[官方网站](https://www.v2ray-agent.com/)
 - [RackNerd特价优质VPS深度评测](https://www.v2ray-agent.com/archives/1688973668640)
+- [传家宝级别搬瓦工（GIA、软银），强烈推荐](https://bandwagonhost.com/aff.php?aff=64917&pid=94)
 
 - **请给个⭐支持一下**
 
 # 一、项目介绍
 
 - [一键安装教程【推荐】](https://www.v2ray-agent.com/archives/1682491479771)
-- 支持Xray-core/v2ray-core/Hysteria/Tuic
+- 支持Xray-core/sing-box/Hysteria/Tuic
 - 支持多种传输协议，VLESS（Reality）、VMess、Trojan、Hysteria、Tuic，支持多种协议组合。
 - 支持自动申请和更新证书
 - 支持自主更换伪装站点
@@ -30,7 +31,6 @@
 
 > 再好的协议也比不上一个高品质的VPS。推荐以下线路
 
-- [传家宝级别搬瓦工（GIA、软银），强烈推荐](https://bandwagonhost.com/aff.php?aff=64917&pid=94)
 - [VPS选购指南,避坑指南](https://www.v2ray-agent.com/archives/1679975663984)
 - [CN2 GIA](https://www.v2ray-agent.com/tags/cn2-gia)
 - [AS9929](https://www.v2ray-agent.com/tags/as9929)
