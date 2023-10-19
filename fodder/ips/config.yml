@@ -39,7 +39,7 @@ proxy-groups:
     type: url-test
     proxies:
       - bart
-      - nerd
+      - vmiss
     # tolerance: 150
     # lazy: true
     url: "https://cp.cloudflare.com/generate_204"
@@ -48,9 +48,8 @@ proxy-groups:
     type: url-test
     proxies:
       - bart
-      - nerd
-      - bart_hysteria
-      - nerd_hysteria
+      - vmiss
+      - vmiss_hysteria
     # tolerance: 150
     # lazy: true
     url: "https://cp.cloudflare.com/generate_204"
@@ -149,41 +148,30 @@ proxies:
   - name: "bart"
     type: vless
     server: 156.251.130.60
-    port: 11775
+    port: 14475
     uuid: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
     network: tcp
     tls: true
     udp: true
     flow: xtls-rprx-vision
-    servername: www.microsoft.com
+    servername: "download-installer.cdn.mozilla.net"
     reality-opts:
-      public-key: WR7nMA3mbTl5rFVTtYGM8ZcQElUZtWtiru3Li0sHGSc
+      public-key: NryIMJ3wtpUeSvIYNf5CCmFOlbl5cKEI0PGEnj8hWxQ
     client-fingerprint: chrome
-  - name: "nerd"
+  - name: "vmiss"
     type: vless
-    server: 198.211.6.60
-    port: 1562
-    uuid: "7c72e318-0386-46f8-bfef-faa1956cf101"
+    server: 45.93.28.208
+    port: 443
+    uuid: 4f17dca2-f67d-4a9c-8bec-fab0160f5f09
     network: tcp
     tls: true
     udp: true
     flow: xtls-rprx-vision
-    servername: addons.mozilla.org
+    servername: mensura.cdn-apple.com
     reality-opts:
-      public-key: 2kGoqYzgdEChZ5I6b2NRtSlLMSaDCZhbxaJ1IrF2whg
-    client-fingerprint: firefox # cannot be empty
-  - name: "bart_hysteria"
-    type: hysteria
-    server: bart.howies.live
-    port: 20495
-    auth_str: "a4e080df-c2aa-4c05-b759-6cd11bb59fc1"
-    alpn:
-     - h3
-    protocol: udp
-    up: "50"
-    down: "100"
-    sni: bart.howies.live
-  - name: "nerd_hysteria"
+      public-key: XtyAgiNNxUVX0mp397SwPqINVdRpIXPJWgACq41BVjU
+    client-fingerprint: chrome # cannot be empty
+  - name: "vmiss_hysteria"
     type: hysteria
     server: homer.howies.live
     port: 10000
@@ -298,13 +286,14 @@ rules:
   ############################# 自定义 #############################
   - GEOSITE,category-ads-all,REJECT
   - GEOSITE,category-porn,REJECT
-  - GEOSITE,openai,bart_hysteria
+  - GEOSITE,openai,bart
+  - GEOSITE,paypal,bart
   - GEOSITE,apple-cn,DIRECT
   - GEOSITE,google,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN,usegalaxy.org,DIRECT
-  - DOMAIN-KEYWORD,bing,nerd_hysteria
-  - GEOSITE,bing,nerd_hysteria
+  - DOMAIN-KEYWORD,bing,vmiss_hysteria
+  - GEOSITE,bing,vmiss_hysteria
   - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
   - DOMAIN-SUFFIX,sourceforge.net,auto_xray_only
   - DOMAIN,clash.razord.top,DIRECT
@@ -330,6 +319,8 @@ rules:
   - MATCH,auto_all
 sub-rules:
   sub-browser:
-  - DOMAIN-KEYWORD,openai,bart
+  - GEOSITE,openai,bart
+  - GEOSITE,paypal,bart
+  - GEOSITE,steam,bart
   - DOMAIN,usegalaxy.org,auto_xray_only
   - MATCH,auto_xray_only
