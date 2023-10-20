@@ -167,9 +167,10 @@ proxies:
     tls: true
     udp: true
     flow: xtls-rprx-vision
-    servername: mensura.cdn-apple.com
+    servername: vmiss.howies.live
     reality-opts:
-      public-key: XtyAgiNNxUVX0mp397SwPqINVdRpIXPJWgACq41BVjU
+      public-key: CPQoSrhCSPCH7VH26ozE7stujTwyFv-hH9vyjJeEECE
+      short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome # cannot be empty
   - name: "vmiss_hysteria"
     type: hysteria
@@ -319,8 +320,8 @@ rules:
   - MATCH,auto_all
 sub-rules:
   sub-browser:
-  - GEOSITE,openai,bart
-  - GEOSITE,paypal,bart
-  - GEOSITE,steam,bart
-  - DOMAIN,usegalaxy.org,auto_xray_only
-  - MATCH,auto_xray_only
+   - GEOSITE,openai,bart
+   - GEOSITE,paypal,bart
+   - GEOSITE,steam,bart
+   - DOMAIN,usegalaxy.org,auto_xray_only
+   - MATCH,auto_xray_only
