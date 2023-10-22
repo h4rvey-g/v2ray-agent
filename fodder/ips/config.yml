@@ -223,7 +223,6 @@ rules:
   - GEOIP,us,auto_xray_only
   - GEOIP,ca,auto_xray_only
   - GEOIP,telegram,auto_xray_only
-  - RULE-SET,applications,DIRECT
   - GEOIP,LAN,DIRECT
   - GEOIP,CN,DIRECT
   - MATCH,auto_all
