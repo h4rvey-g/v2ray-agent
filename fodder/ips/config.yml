@@ -40,8 +40,6 @@ proxy-groups:
     proxies:
       - bart
       - vmiss
-    # tolerance: 150
-    # lazy: true
     url: "https://cp.cloudflare.com/generate_204"
     interval: 300
   - name: "auto_all"
@@ -50,8 +48,6 @@ proxy-groups:
       - bart
       - vmiss
       - vmiss_hysteria
-    # tolerance: 150
-    # lazy: true
     url: "https://cp.cloudflare.com/generate_204"
     interval: 300
 # DNS 服务器配置(可选；若不配置，程序内置的 DNS 服务会被关闭)
@@ -68,23 +64,23 @@ dns:
     - 8.8.8.8
     - 1.1.1.1
   nameserver-policy:
-   'spcnwikia.top': '223.5.5.5'
-   'domain:xjtu.edu.cn': '223.5.5.5'
-   'geosite:openai': 'https://dns.google/dns-query'
-   'geosite:microsoft': 'https://dns.google/dns-query'
-   'geosite:msn': 'https://dns.google/dns-query'
-   'geosite:bing': 'https://dns.google/dns-query'
-   'bingapis.com': 'https://dns.google/dns-query'
+   'spcnwikia.top': 'https://dns.alidns.com/dns-query'
+   'domain:xjtu.edu.cn': 'https://dns.alidns.com/dns-query'
+   'geosite:openai': 'https://1.1.1.1/dns-query'
+   'geosite:microsoft': 'https://1.1.1.1/dns-query'
+   'geosite:msn': 'https://1.1.1.1/dns-query'
+   'geosite:bing': 'https://1.1.1.1/dns-query'
+   'bingapis.com': 'https://1.1.1.1/dns-query'
+   'geosite:gfw': [https://1.1.1.1/dns-query, https://dns.google/dns-query]
   #  '+.internal.crop.com': '10.0.0.1'
   #  'geosite:cn': https://doh.pub/dns-query
   #  'geosite:geolocation-!cn': [tls://8.8.4.4, https://1.0.0.1/dns-query]
   #  "www.baidu.com,+.google.cn": [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
   #  "geosite:private,apple": [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
   nameserver:
-    - tls://223.5.5.5
-    - https://dns.alidns.com/dns-query
-    - https://doh.pub/dns-query
-    # - tls://223.5.5.5:853 # 百度DNS
+   - tls://223.5.5.5
+   - https://dns.alidns.com/dns-query
+   - https://doh.pub/dns-query
   fallback:
    - https://1.1.1.1/dns-query
    - https://1.0.0.1/dns-query
@@ -94,8 +90,6 @@ dns:
   fallback-filter:
     geoip: true
     geoip-code: CN
-    geosite:
-      - gfw
     ipcidr:
       - 240.0.0.0/4
     domain:
@@ -174,7 +168,7 @@ proxies:
     servername: vmiss.howies.live
     reality-opts:
       public-key: CPQoSrhCSPCH7VH26ozE7stujTwyFv-hH9vyjJeEECE
-      short-id: 6ba85179e30d4fc2
+     # short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome # cannot be empty
   - name: "vmiss_hysteria"
     type: hysteria
@@ -232,7 +226,4 @@ rules:
   - MATCH,auto_all
 sub-rules:
   sub-browser:
-   - GEOSITE,openai,bart
-   - GEOSITE,paypal,bart
-   - GEOSITE,steam,bart
-   - DOMAIN,usegalaxy.org,auto_xray_only
+    - MATCH,auto_all
