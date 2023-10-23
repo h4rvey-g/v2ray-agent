@@ -236,4 +236,3 @@ sub-rules:
    - GEOSITE,paypal,bart
    - GEOSITE,steam,bart
    - DOMAIN,usegalaxy.org,auto_xray_only
-   - MATCH,auto_xray_only
