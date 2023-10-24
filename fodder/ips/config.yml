@@ -207,6 +207,7 @@ rules:
   - GEOSITE,google-cn,DIRECT
   - GEOSITE,tld-cn,DIRECT
   - GEOSITE,category-games@cn,DIRECT
+  - GEOSITE,steam,bart
   - GEOSITE,geolocation-!cn,auto_xray_only
   - GEOIP,cn,DIRECT
   - GEOIP,private,DIRECT
