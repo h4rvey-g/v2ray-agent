@@ -50,6 +50,9 @@ proxy-groups:
       - vmiss_hysteria
     url: "https://cp.cloudflare.com/generate_204"
     interval: 300
+profile:
+  store-selected: true
+  store-fake-ip: true
 # DNS 服务器配置(可选；若不配置，程序内置的 DNS 服务会被关闭)
 dns:
   enable: true # 是否启用dns false
