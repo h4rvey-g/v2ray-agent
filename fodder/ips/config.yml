@@ -48,6 +48,7 @@ proxy-groups:
       - bart
       - vmiss
       - vmiss_hysteria
+      - bart_hysteria
     url: "https://cp.cloudflare.com/generate_204"
     interval: 300
 profile:
@@ -155,9 +156,9 @@ proxies:
     tls: true
     udp: true
     flow: xtls-rprx-vision
-    servername: "download-installer.cdn.mozilla.net"
+    servername: "lol.secure.dyn.riotcdn.net"
     reality-opts:
-      public-key: NryIMJ3wtpUeSvIYNf5CCmFOlbl5cKEI0PGEnj8hWxQ
+      public-key: Etw6Xhjqf1Vsl7JCnmgMVIo43o3rt6tsdon7qS3kwCY
     client-fingerprint: chrome
   - name: "vmiss"
     type: vless
@@ -174,18 +175,34 @@ proxies:
      # short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome # cannot be empty
   - name: "vmiss_hysteria"
-    type: hysteria
-    server: homer.howies.live
-    port: 10000
-    auth_str:  "7c72e318-0386-46f8-bfef-faa1956cf101" # 将会在未来某个时候删除
-    # auth-str: yourpassword
-    # obfs: obfs_str
+    type: hysteria2
+    server: vmiss.howies.live
+    port: 23221
+    password: 4f17dca2-f67d-4a9c-8bec-fab0160f5f09
+    # obfs: salamander # 默认为空，如果填写则开启obfs，目前仅支持salamander
+    # obfs-password: yourpassword
+    sni: vmiss.howies.live
+    # skip-cert-verify: false
+    # fingerprint: xxxx
     alpn:
       - h3
-    protocol: udp # 支持 udp/wechat-video/faketcp
-    up: "50 Mbps" # 若不写单位，默认为 Mbps
-    down: "100 Mbps" # 若不写单位，默认为 Mbps
-    sni: homer.howies.live
+    # ca: "./my.ca"
+    # ca-str: "xyz"
+  - name: "bart_hysteria"
+    type: hysteria2
+    server: bart.howies.live
+    port: 15206
+    password: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
+    # obfs: salamander # 默认为空，如果填写则开启obfs，目前仅支持salamander
+    # obfs-password: yourpassword
+    sni: bart.howies.live
+    # skip-cert-verify: false
+    # fingerprint: xxxx
+    alpn:
+      - h3
+    # ca: "./my.ca"
+    # ca-str: "xyz"
+
 
 rules:
   ############################# 自定义 #############################
@@ -230,4 +247,4 @@ rules:
   - MATCH,auto_all
 sub-rules:
   sub-browser:
-    - MATCH,auto_all
+    - MATCH,auto_xray_only
