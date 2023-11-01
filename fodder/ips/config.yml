@@ -208,7 +208,7 @@ rules:
   ############################# 自定义 #############################
   - GEOSITE,category-ads-all,REJECT
   - GEOSITE,category-porn,REJECT
-  - GEOSITE,openai,bart
+  - GEOSITE,openai,bart_hysteria
   - GEOSITE,paypal,bart
   - GEOSITE,google,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
@@ -247,4 +247,7 @@ rules:
   - MATCH,auto_all
 sub-rules:
   sub-browser:
+    - GEOSITE,openai,bart_hysteria
+    - GEOSITE,github,auto_xray_only
+    - GEOSITE,category-entertainment,auto_all
     - MATCH,auto_xray_only
