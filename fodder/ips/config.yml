@@ -51,9 +51,9 @@ proxy-groups:
       - bart_hysteria
     url: "https://cp.cloudflare.com/generate_204"
     interval: 300
-profile:
-  store-selected: true
-  store-fake-ip: true
+# profile:
+#   store-selected: true
+#   store-fake-ip: true
 # DNS 服务器配置(可选；若不配置，程序内置的 DNS 服务会被关闭)
 dns:
   enable: true # 是否启用dns false
@@ -208,6 +208,33 @@ rules:
   ############################# 自定义 #############################
   - GEOSITE,category-ads-all,REJECT
   - GEOSITE,category-porn,REJECT
+  ############################# Adobe activation ##################
+  - GEOSITE,adobe-activation,REJECT
+  - DOMAIN-SUFFIX,ic.adobe.io,REJECT
+  - DOMAIN-SUFFIX,7sj9n87sls.adobe.io,REJECT
+  - DOMAIN-SUFFIX,ij0gdyrfka.adobe.io,REJECT
+  - DOMAIN-SUFFIX,lm.licenses.adobe.com,REJECT
+  - DOMAIN-SUFFIX,na2m-pr.licenses.adobe.com,REJECT
+  - DOMAIN-SUFFIX,practivate.adobe.com,REJECT
+  - DOMAIN-SUFFIX,activate.adobe.com,REJECT
+  - DOMAIN-SUFFIX,ereg.adobe.com,REJECT
+  - DOMAIN-SUFFIX,wip.adobe.com,REJECT
+  - DOMAIN-SUFFIX,lmlicenses.wip4.adobe.com,REJECT
+  - DOMAIN-SUFFIX,na1r.services.adobe.com,REJECT
+  - DOMAIN-SUFFIX,hlrcv.stage.adobe.com,REJECT
+  - DOMAIN-SUFFIX,genuine.adobe.com,REJECT
+  - DOMAIN-SUFFIX,prod.adobegenuine.com,REJECT
+  - DOMAIN-SUFFIX,cc-api-data.adobe.io,REJECT
+  # - DOMAIN-SUFFIX,ims-prod06.adobelogin.com,REJECT
+  - DOMAIN-SUFFIX,p13n.adobe.io,REJECT
+  - DOMAIN-SUFFIX,crs.cr.adobe.com,REJECT
+  - DOMAIN-SUFFIX,lcs-cops.adobe.io,REJECT
+  # - DOMAIN-SUFFIX,hbrt.adobe.com,REJECT
+  - DOMAIN-SUFFIX,23ynjitwt5.adobe.io,REJECT
+  - DOMAIN-SUFFIX,butler.adobe.com,REJECT
+  - DOMAIN-SUFFIX,acp-ss-va6c2.adobe.io,REJECT
+  - AND,((PROCESS-NAME,Illustrator.exe),(DOMAIN-SUFFIX,adobe.io)),REJECT
+ ############################# End Adobe activation ##################
   - GEOSITE,openai,bart_hysteria
   - GEOSITE,paypal,bart
   - GEOSITE,google,auto_xray_only
@@ -249,5 +276,6 @@ sub-rules:
   sub-browser:
     - GEOSITE,openai,bart_hysteria
     - GEOSITE,github,auto_xray_only
+    - GEOSITE,steam,bart
     - GEOSITE,category-entertainment,auto_all
     - MATCH,auto_xray_only
