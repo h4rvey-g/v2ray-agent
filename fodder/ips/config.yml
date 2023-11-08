@@ -236,6 +236,7 @@ rules:
   - AND,((PROCESS-NAME,Illustrator.exe),(DOMAIN-SUFFIX,adobe.io)),REJECT
  ############################# End Adobe activation ##################
   - GEOSITE,openai,bart_hysteria
+  - DOMAIN-SUFFIX,oaiusercontent.com,bart_hysteria
   - GEOSITE,paypal,bart
   - GEOSITE,google,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
@@ -274,6 +275,7 @@ rules:
   - MATCH,auto_all
 sub-rules:
   sub-browser:
+    - GEOSITE,paypal,bart
     - GEOSITE,openai,bart_hysteria
     - GEOSITE,github,auto_xray_only
     - GEOSITE,steam,bart
