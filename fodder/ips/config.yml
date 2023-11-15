@@ -4,8 +4,8 @@ mode: rule
 log-level: debug
 external-controller: :9090
 geox-url:
-  geoip: "https://ghproxy.com/https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"
-  geosite: "https://ghproxy.com/https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"
+  geoip: "https://gh-proxy.com/https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"
+  geosite: "https://gh-proxy.com/https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"
 global-client-fingerprint: chrome
 # interface-name: WLAN
 ipv6: false
@@ -75,6 +75,7 @@ dns:
    'geosite:msn': 'https://1.1.1.1/dns-query'
    'geosite:bing': 'https://1.1.1.1/dns-query'
    'bingapis.com': 'https://1.1.1.1/dns-query'
+   '+.bing.com': 'https://1.1.1.1/dns-query'
    'geosite:gfw': [https://1.1.1.1/dns-query, https://dns.google/dns-query]
   #  '+.internal.crop.com': '10.0.0.1'
   #  'geosite:cn': https://doh.pub/dns-query
@@ -83,14 +84,12 @@ dns:
   #  "geosite:private,apple": [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
   nameserver:
    - tls://223.5.5.5
-   - https://dns.alidns.com/dns-query
+   - https://223.5.5.5/dns-query#h3=true
    - https://doh.pub/dns-query
   fallback:
    - https://1.1.1.1/dns-query
-   - https://1.0.0.1/dns-query
+   - https://dns.cloudflare.com/dns-query#h3=true
    - tls://dns.google
-   - https://dns.quad9.net/dns-query
-   - https://dns.google/dns-query
   fallback-filter:
     geoip: true
     geoip-code: CN
@@ -241,8 +240,8 @@ rules:
   - GEOSITE,google,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN,usegalaxy.org,DIRECT
-  - DOMAIN-KEYWORD,bing,vmiss_hysteria
-  - GEOSITE,bing,vmiss_hysteria
+  - DOMAIN-KEYWORD,bing,bart_hysteria
+  - GEOSITE,bing,bart_hysteria
   - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
   - DOMAIN-SUFFIX,sourceforge.net,auto_xray_only
   - DOMAIN,clash.razord.top,DIRECT
