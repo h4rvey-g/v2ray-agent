@@ -49,6 +49,7 @@ proxy-groups:
       - vmiss
       - vmiss_hysteria
       - bart_hysteria
+      - bart_tuic
     url: "https://cp.cloudflare.com/generate_204"
     interval: 300
 # profile:
@@ -190,7 +191,7 @@ proxies:
   - name: "bart_hysteria"
     type: hysteria2
     server: bart.howies.live
-    port: 15206
+    port: 19342
     password: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
     # obfs: salamander # 默认为空，如果填写则开启obfs，目前仅支持salamander
     # obfs-password: yourpassword
@@ -201,6 +202,25 @@ proxies:
       - h3
     # ca: "./my.ca"
     # ca-str: "xyz"
+  - name: "bart_tuic"
+    server: bart.howies.live
+    port: 19762
+    type: tuic
+    uuid: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
+    password: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
+    ip: 156.251.130.60
+    # heartbeat-interval: 10000
+    alpn: [h3]
+    disable-sni: true
+    reduce-rtt: true
+    request-timeout: 8000
+    udp-relay-mode: native
+    congestion-controller: bbr
+    # max-udp-relay-packet-size: 1500
+    # fast-open: true
+    # skip-cert-verify: true
+    # max-open-streams: 20
+    # sni: example.com
 
 
 rules:
@@ -240,8 +260,8 @@ rules:
   - GEOSITE,google,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN,usegalaxy.org,DIRECT
-  - DOMAIN-KEYWORD,bing,bart_hysteria
-  - GEOSITE,bing,bart_hysteria
+  - DOMAIN-KEYWORD,bing,bart_tuic
+  - GEOSITE,bing,bart_tuic
   - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
   - DOMAIN-SUFFIX,sourceforge.net,auto_xray_only
   - DOMAIN,clash.razord.top,DIRECT
@@ -275,7 +295,7 @@ rules:
 sub-rules:
   sub-browser:
     - GEOSITE,paypal,bart
-    - GEOSITE,openai,bart_hysteria
+    - GEOSITE,openai,bart_tuic
     - GEOSITE,github,auto_xray_only
     - GEOSITE,steam,bart
     - GEOSITE,category-entertainment,auto_all
