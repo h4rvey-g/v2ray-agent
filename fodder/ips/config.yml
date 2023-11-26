@@ -234,7 +234,6 @@ proxies:
 rules:
   ############################# 自定义 #############################
   - GEOSITE,category-ads-all,REJECT
-  - GEOSITE,category-porn,REJECT
   ############################# Adobe activation ##################
   - GEOSITE,adobe-activation,REJECT
   - DOMAIN-SUFFIX,ic.adobe.io,REJECT
