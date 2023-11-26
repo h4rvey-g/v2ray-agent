@@ -52,6 +52,14 @@ proxy-groups:
       - bart_tuic
     url: "https://cp.cloudflare.com/generate_204"
     interval: 300
+  - name: "bart_all"
+    type: url-test
+    proxies:
+      - bart
+      - bart_hysteria
+      - bart_tuic
+    url: "https://cp.cloudflare.com/generate_204"
+    interval: 300
 # profile:
 #   store-selected: true
 #   store-fake-ip: true
@@ -254,14 +262,14 @@ rules:
   - DOMAIN-SUFFIX,acp-ss-va6c2.adobe.io,REJECT
   - AND,((PROCESS-NAME,Illustrator.exe),(DOMAIN-SUFFIX,adobe.io)),REJECT
  ############################# End Adobe activation ##################
-  - GEOSITE,openai,bart_hysteria
+  - GEOSITE,openai,bart_all
   - DOMAIN-SUFFIX,oaiusercontent.com,bart_hysteria
-  - GEOSITE,paypal,bart
+  - GEOSITE,paypal,bart_all
   - GEOSITE,google,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN,usegalaxy.org,DIRECT
-  - DOMAIN-KEYWORD,bing,bart_tuic
-  - GEOSITE,bing,bart_tuic
+  - DOMAIN-KEYWORD,bing,bart_all
+  - GEOSITE,bing,bart_all
   - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
   - DOMAIN-SUFFIX,sourceforge.net,auto_xray_only
   - DOMAIN,clash.razord.top,DIRECT
@@ -274,7 +282,7 @@ rules:
   - GEOSITE,google-cn,DIRECT
   - GEOSITE,tld-cn,DIRECT
   - GEOSITE,category-games@cn,DIRECT
-  - GEOSITE,steam,bart
+  - GEOSITE,steam,bart_all
   - GEOSITE,geolocation-!cn,auto_xray_only
   - GEOIP,cn,DIRECT
   - GEOIP,private,DIRECT
@@ -294,9 +302,9 @@ rules:
   - MATCH,auto_all
 sub-rules:
   sub-browser:
-    - GEOSITE,paypal,bart
-    - GEOSITE,openai,bart_tuic
+    - GEOSITE,paypal,bart_all
+    - GEOSITE,openai,bart_all
     - GEOSITE,github,auto_xray_only
-    - GEOSITE,steam,bart
+    - GEOSITE,steam,bart_all
     - GEOSITE,category-entertainment,auto_all
     - MATCH,auto_xray_only
