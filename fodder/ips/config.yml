@@ -41,7 +41,8 @@ proxy-groups:
       - bart
       - vmiss
     url: "https://cp.cloudflare.com/generate_204"
-    interval: 300
+    interval: 60
+    tolerance: 50
   - name: "auto_all"
     type: url-test
     proxies:
@@ -51,7 +52,8 @@ proxy-groups:
       - bart_hysteria
       - bart_tuic
     url: "https://cp.cloudflare.com/generate_204"
-    interval: 300
+    interval: 60
+    tolerance: 50
   - name: "bart_all"
     type: url-test
     proxies:
@@ -59,7 +61,8 @@ proxy-groups:
       - bart_hysteria
       - bart_tuic
     url: "https://cp.cloudflare.com/generate_204"
-    interval: 300
+    interval: 60
+    tolerance: 50
 # profile:
 #   store-selected: true
 #   store-fake-ip: true
