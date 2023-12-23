@@ -28,11 +28,6 @@ tun:
   #   - '::/1'
   #   - '8000::/1'
 
-listeners:
-  - name: socks5-in-1
-    type: socks
-    port: 2023
-    rule: sub-browser
 proxy-groups:
   # url-test 将按照 url 测试结果使用延迟最低节点
   - name: "auto_xray_only"
@@ -264,6 +259,7 @@ rules:
   - DOMAIN-SUFFIX,acp-ss-va6c2.adobe.io,REJECT
   - AND,((PROCESS-NAME,Illustrator.exe),(DOMAIN-SUFFIX,adobe.io)),REJECT
  ############################# End Adobe activation ##################
+  - SUB-RULE,(SRC-PORT,10801),sub-browser
   - GEOSITE,openai,bart_all
   - DOMAIN-SUFFIX,bard.google.com,bart_all
   - DOMAIN-SUFFIX,oaiusercontent.com,bart_hysteria
