@@ -13,7 +13,7 @@ ipv6: false
 tun:
   enable: true
   device: meta              #MacOS建议删除此项
-  stack: system             #system / gvisor / lwip liwp仅为1.13.2以上的功能
+  stack: mixed             #system / gvisor / lwip liwp仅为1.13.2以上的功能
   dns-hijack:
     - any:53
     - tcp://any:53
@@ -262,7 +262,7 @@ rules:
   - SUB-RULE,(SRC-PORT,10801),sub-browser
   - GEOSITE,openai,bart_all
   - DOMAIN-SUFFIX,bard.google.com,bart_all
-  - DOMAIN-SUFFIX,oaiusercontent.com,bart_hysteria
+  - DOMAIN-SUFFIX,oaiusercontent.com,bart_all
   - GEOSITE,paypal,bart_all
   - GEOSITE,google,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
@@ -306,4 +306,3 @@ sub-rules:
     - GEOSITE,github,auto_xray_only
     - GEOSITE,steam,bart_all
     - GEOSITE,category-entertainment,auto_all
-    - MATCH,auto_xray_only
