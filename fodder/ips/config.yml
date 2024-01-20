@@ -1,4 +1,4 @@
- mixed-port: 10801
+mixed-port: 10801
 allow-lan: true
 mode: rule
 log-level: debug
@@ -260,13 +260,13 @@ rules:
   - AND,((PROCESS-NAME,Illustrator.exe),(DOMAIN-SUFFIX,adobe.io)),REJECT
  ############################# End Adobe activation ##################
   - SUB-RULE,(SRC-PORT,10801),sub-browser
-  - PROCESS-NAME,Obsidian.exe,bart_all
   - GEOSITE,openai,bart_all
   - DOMAIN-SUFFIX,bard.google.com,bart_all
   - DOMAIN-SUFFIX,oaiusercontent.com,bart_all
   - GEOSITE,paypal,bart_all
   - GEOSITE,google,auto_xray_only
-  - GEOSITE,github,auto_bart
+  - GEOSITE,github,auto_xray_only
+  - PROCESS-NAME,Obsidian.exe,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN,usegalaxy.org,DIRECT
   - DOMAIN-KEYWORD,bing,bart_all
@@ -305,6 +305,6 @@ sub-rules:
   sub-browser:
     - GEOSITE,paypal,bart_all
     - GEOSITE,openai,bart_all
-    - GEOSITE,github,auto_bart
+    - GEOSITE,github,auto_xray_only
     - GEOSITE,steam,bart_all
     - GEOSITE,category-entertainment,auto_all
