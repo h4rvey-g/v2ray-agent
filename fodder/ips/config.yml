@@ -268,7 +268,8 @@ rules:
   - GEOSITE,github,auto_xray_only
   - PROCESS-NAME,Obsidian.exe,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
-  - DOMAIN,usegalaxy.org,DIRECT
+  - DOMAIN-SUFFIX,usegalaxy.org,DIRECT
+  - DOMAIN-SUFFIX,misakaf.org,DIRECT
   - DOMAIN-KEYWORD,bing,bart_all
   - GEOSITE,bing,bart_all
   - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
@@ -277,7 +278,7 @@ rules:
   - DOMAIN,yacd.haishan.me,DIRECT
   - DOMAIN-KEYWORD,spcnwiki,DIRECT
   # - DOMAIN,sg.imedicaldoctor.net,REJECT
-  - DOMAIN,spcnwikia.top,DIRECT
+  - DOMAIN-SUFFIX,spcnwikia.top,DIRECT
   - GEOSITE,private,DIRECT
   - GEOSITE,apple-cn,DIRECT
   - GEOSITE,google-cn,DIRECT
