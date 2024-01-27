@@ -269,7 +269,7 @@ rules:
   - PROCESS-NAME,Obsidian.exe,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN-SUFFIX,usegalaxy.org,DIRECT
-  - DOMAIN-SUFFIX,misakaf.org,DIRECT
+  - DOMAIN-SUFFIX,misakaf.org,auto_all
   - DOMAIN-KEYWORD,bing,bart_all
   - GEOSITE,bing,bart_all
   - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
