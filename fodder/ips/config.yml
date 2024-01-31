@@ -156,15 +156,15 @@ proxies:
   - name: "bart"
     type: vless
     server: 156.251.130.60
-    port: 14475
-    uuid: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
+    port: 18718
+    uuid: 2958f6f6-9f70-48ce-b6fe-bf7ae11725e6
     network: tcp
     tls: true
     udp: true
     flow: xtls-rprx-vision
     servername: "lol.secure.dyn.riotcdn.net"
     reality-opts:
-      public-key: Etw6Xhjqf1Vsl7JCnmgMVIo43o3rt6tsdon7qS3kwCY
+      public-key: oj3i0N2TzANtrAZ-ClcDpXjvn6UegoWDnc8QzuihwVo
     client-fingerprint: chrome
   - name: "vmiss"
     type: vless
@@ -196,9 +196,9 @@ proxies:
     # ca-str: "xyz"
   - name: "bart_hysteria"
     type: hysteria2
-    server: bart.howies.live
-    port: 19342
-    password: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
+    server: 156.251.130.60
+    port: 40843
+    password: 2958f6f6-9f70-48ce-b6fe-bf7ae11725e6
     # obfs: salamander # 默认为空，如果填写则开启obfs，目前仅支持salamander
     # obfs-password: yourpassword
     sni: bart.howies.live
@@ -210,10 +210,10 @@ proxies:
     # ca-str: "xyz"
   - name: "bart_tuic"
     server: bart.howies.live
-    port: 19762
+    port: 27629
     type: tuic
-    uuid: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
-    password: a4e080df-c2aa-4c05-b759-6cd11bb59fc1
+    uuid: "2958f6f6-9f70-48ce-b6fe-bf7ae11725e6"
+    password: "2958f6f6-9f70-48ce-b6fe-bf7ae11725e6"
     ip: 156.251.130.60
     # heartbeat-interval: 10000
     alpn: [h3]
@@ -272,6 +272,8 @@ rules:
   - DOMAIN-SUFFIX,misakaf.org,auto_all
   - DOMAIN-KEYWORD,bing,bart_all
   - GEOSITE,bing,bart_all
+  - GEOSITE,spotify,bart_all
+  - GEOSITE,spotify,bart_all
   - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
   - DOMAIN-SUFFIX,sourceforge.net,auto_xray_only
   - DOMAIN,clash.razord.top,DIRECT
