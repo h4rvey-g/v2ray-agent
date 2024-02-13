@@ -76,8 +76,8 @@ dns:
     - 1.1.1.1
   nameserver-policy:
    'spcnwikia.top': 'https://dns.alidns.com/dns-query'
-   'domain:xjtu.edu.cn': 'https://dns.alidns.com/dns-query'
-   'domain:howies.live': 'https://dns.alidns.com/dns-query'
+   '+.xjtu.edu.cn': 'https://dns.alidns.com/dns-query'
+   '+.howies.live': 'https://dns.alidns.com/dns-query'
    'geosite:openai': 'https://1.1.1.1/dns-query'
    'geosite:microsoft': 'https://1.1.1.1/dns-query'
    'geosite:msn': 'https://1.1.1.1/dns-query'
