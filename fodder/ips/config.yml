@@ -71,33 +71,32 @@ dns:
   # use-hosts: true 
   fake-ip-range: 198.18.0.1/16
   default-nameserver: 
-    - 223.5.5.5 # 阿里DNS
     - 8.8.8.8
     - 1.1.1.1
   nameserver-policy:
    'spcnwikia.top': 'https://dns.alidns.com/dns-query'
    '+.xjtu.edu.cn': 'https://dns.alidns.com/dns-query'
-   '+.howies.live': 'https://dns.alidns.com/dns-query'
-   'geosite:openai': 'https://1.1.1.1/dns-query'
-   'geosite:microsoft': 'https://1.1.1.1/dns-query'
-   'geosite:msn': 'https://1.1.1.1/dns-query'
-   'geosite:bing': 'https://1.1.1.1/dns-query'
-   'bingapis.com': 'https://1.1.1.1/dns-query'
-   '+.bing.com': 'https://1.1.1.1/dns-query'
-   'geosite:gfw': [https://1.1.1.1/dns-query, https://dns.google/dns-query]
+   '+.howies.live': 'https://deans.howiesyu.link'
+   '+.fakeopenai.cn': 'https://deans.howiesyu.link'
+   'geosite:github' : 'https://deans.howiesyu.link'
+   'geosite:openai': 'https://deans.howiesyu.link'
+   'geosite:bing': 'https://deans.howiesyu.link'
+   'bingapis.com': 'https://deans.howiesyu.link'
+   '+.bing.com': 'https://deans.howiesyu.link'
+   'geosite:gfw': 'https://deans.howiesyu.link'
   #  '+.internal.crop.com': '10.0.0.1'
   #  'geosite:cn': https://doh.pub/dns-query
   #  'geosite:geolocation-!cn': [tls://8.8.4.4, https://1.0.0.1/dns-query]
   #  "www.baidu.com,+.google.cn": [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
   #  "geosite:private,apple": [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
   nameserver:
-   - tls://223.5.5.5
-   - https://223.5.5.5/dns-query#h3=true
    - https://doh.pub/dns-query
+   - https://dns.alidns.com/dns-query
   fallback:
    - https://1.1.1.1/dns-query
-   - https://dns.cloudflare.com/dns-query#h3=true
-   - tls://dns.google
+   - https://deans.howiesyu.link
+   - https://max.rethinkdns.com
+   - https://sky.rethinkdns.com
   fallback-filter:
     geoip: true
     geoip-code: CN
@@ -268,7 +267,7 @@ rules:
   - GEOSITE,paypal,bart_all
   - GEOSITE,google,auto_xray_only
   - GEOSITE,github,bart_vision
-  - PROCESS-NAME,Obsidian.exe,auto_xray_only
+  - PROCESS-NAME,Obsidian.exe,bart_vision
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN-SUFFIX,usegalaxy.org,DIRECT
   - DOMAIN-SUFFIX,misakaf.org,auto_all
