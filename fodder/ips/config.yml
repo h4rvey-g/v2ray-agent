@@ -44,8 +44,8 @@ proxy-groups:
       - bart
       - vmiss
       - vmiss_hysteria
-      - bart_hysteria
-      - bart_tuic
+      - bart_vision
+      - bart_gRPC
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
     tolerance: 50
@@ -53,8 +53,8 @@ proxy-groups:
     type: url-test
     proxies:
       - bart
-      - bart_hysteria
-      - bart_tuic
+      - bart_vision
+      - bart_gRPC
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
     tolerance: 50
@@ -77,6 +77,7 @@ dns:
   nameserver-policy:
    'spcnwikia.top': 'https://dns.alidns.com/dns-query'
    'domain:xjtu.edu.cn': 'https://dns.alidns.com/dns-query'
+   'domain:howies.live': 'https://dns.alidns.com/dns-query'
    'geosite:openai': 'https://1.1.1.1/dns-query'
    'geosite:microsoft': 'https://1.1.1.1/dns-query'
    'geosite:msn': 'https://1.1.1.1/dns-query'
@@ -156,15 +157,36 @@ proxies:
   - name: "bart"
     type: vless
     server: 156.251.130.60
-    port: 18718
-    uuid: 2958f6f6-9f70-48ce-b6fe-bf7ae11725e6
+    port: 26047
+    uuid: 72c855d6-293e-4afa-9009-60b6a9ed781d
     network: tcp
     tls: true
-    udp: true
     flow: xtls-rprx-vision
-    servername: "lol.secure.dyn.riotcdn.net"
+    servername: "one-piece.com"
     reality-opts:
-      public-key: oj3i0N2TzANtrAZ-ClcDpXjvn6UegoWDnc8QzuihwVo
+      public-key: PsUToXo9s6wa7I55tPQqOtDQzDMtAdZTGJHIpJZ6Ejw
+    client-fingerprint: chrome
+  - name: "bart_vision"
+    type: vless
+    server: bart.howies.live
+    port: 10963
+    uuid: 72c855d6-293e-4afa-9009-60b6a9ed781d
+    network: tcp
+    tls: true
+    flow: xtls-rprx-vision
+    client-fingerprint: chrome
+  - name: "bart_gRPC"
+    type: vless
+    server: 156.251.130.60
+    port: 26047
+    uuid: 72c855d6-293e-4afa-9009-60b6a9ed781d
+    network: grpc
+    tls: true
+    servername: "one-piece.com"
+    grpc-opts:
+      grpc-service-name: "grpc"
+    reality-opts:
+      public-key: PsUToXo9s6wa7I55tPQqOtDQzDMtAdZTGJHIpJZ6Ejw
     client-fingerprint: chrome
   - name: "vmiss"
     type: vless
@@ -197,8 +219,8 @@ proxies:
   - name: "bart_hysteria"
     type: hysteria2
     server: 156.251.130.60
-    port: 40843
-    password: 2958f6f6-9f70-48ce-b6fe-bf7ae11725e6
+    port: 13960
+    password: 72c855d6-293e-4afa-9009-60b6a9ed781d4f17dca2-f67d-4a9c-8bec-fab0160f5f09
     # obfs: salamander # 默认为空，如果填写则开启obfs，目前仅支持salamander
     # obfs-password: yourpassword
     sni: bart.howies.live
@@ -206,27 +228,6 @@ proxies:
     # fingerprint: xxxx
     alpn:
       - h3
-    # ca: "./my.ca"
-    # ca-str: "xyz"
-  - name: "bart_tuic"
-    server: bart.howies.live
-    port: 27629
-    type: tuic
-    uuid: "2958f6f6-9f70-48ce-b6fe-bf7ae11725e6"
-    password: "2958f6f6-9f70-48ce-b6fe-bf7ae11725e6"
-    ip: 156.251.130.60
-    # heartbeat-interval: 10000
-    alpn: [h3]
-    disable-sni: true
-    reduce-rtt: true
-    request-timeout: 8000
-    udp-relay-mode: native
-    congestion-controller: bbr
-    # max-udp-relay-packet-size: 1500
-    # fast-open: true
-    # skip-cert-verify: true
-    # max-open-streams: 20
-    # sni: example.com
 
 
 rules:
@@ -263,9 +264,10 @@ rules:
   - GEOSITE,openai,bart_all
   - DOMAIN-SUFFIX,bard.google.com,bart_all
   - DOMAIN-SUFFIX,oaiusercontent.com,bart_all
+  - DOMAIN-SUFFIX,coze.com,bart_all
   - GEOSITE,paypal,bart_all
   - GEOSITE,google,auto_xray_only
-  - GEOSITE,github,auto_xray_only
+  - GEOSITE,github,bart_vision
   - PROCESS-NAME,Obsidian.exe,auto_xray_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN-SUFFIX,usegalaxy.org,DIRECT
@@ -290,6 +292,7 @@ rules:
   - GEOSITE,geolocation-!cn,auto_xray_only
   - GEOIP,cn,DIRECT
   - GEOIP,private,DIRECT
+  - IP-CIDR,156.251.130.60/32,DIRECT
   - IP-CIDR,223.5.5.5/32,DIRECT
   - IP-CIDR,119.29.29.29/32,DIRECT
   - IP-CIDR,180.76.76.76/32,DIRECT
@@ -308,6 +311,6 @@ sub-rules:
   sub-browser:
     - GEOSITE,paypal,bart_all
     - GEOSITE,openai,bart_all
-    - GEOSITE,github,auto_xray_only
+    - GEOSITE,github,bart_vision
     - GEOSITE,steam,bart_all
     - GEOSITE,category-entertainment,auto_all
