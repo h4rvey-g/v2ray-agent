@@ -1292,11 +1292,11 @@ updateRedirectNginxConf() {
     redirectDomain=${domain}:${port}
 
     local nginxH2Conf=
-    nginxH2Conf="listen 127.0.0.1:31302 http2 so_keepalive=on;"
+    nginxH2Conf="listen 127.0.0.1:31302 http2 so_keepalive=on proxy_protocol;"
     nginxVersion=$(nginx -v 2>&1)
 
     if echo "${nginxVersion}" | grep -q "1.25" && [[ $(echo "${nginxVersion}" | awk -F "[.]" '{print $3}') -gt 0 ]]; then
-        nginxH2Conf="listen 127.0.0.1:31302 so_keepalive=on;http2 on;"
+        nginxH2Conf="listen 127.0.0.1:31302 so_keepalive=on proxy_protocol;http2 on;"
     fi
 
     cat <<EOF >${nginxConfigPath}alone.conf
@@ -1315,10 +1315,14 @@ server {
 	server_name ${domain};
 	root ${nginxStaticPath};
 
+    set_real_ip_from 0.0.0.0/0;
+    real_ip_header proxy_protocol;
+
 	client_header_timeout 1071906480m;
     keepalive_timeout 1071906480m;
 
 	location ~ ^/s/(clashMeta|default|clashMetaProfiles)/(.*) {
+	    proxy_set_header X-Real-IP \$proxy_protocol_addr;
         default_type 'text/plain; charset=utf-8';
         alias /etc/v2ray-agent/subscribe/\$1/\$2;
     }
@@ -1352,9 +1356,14 @@ EOF
         cat <<EOF >>${nginxConfigPath}alone.conf
 server {
 	${nginxH2Conf}
+
+	set_real_ip_from 0.0.0.0/0;
+    real_ip_header proxy_protocol;
+
 	server_name ${domain};
 	root ${nginxStaticPath};
 	location ~ ^/s/(clashMeta|default|clashMetaProfiles)/(.*) {
+	    proxy_set_header X-Real-IP \$proxy_protocol_addr;
         default_type 'text/plain; charset=utf-8';
         alias /etc/v2ray-agent/subscribe/\$1/\$2;
     }
@@ -1375,9 +1384,14 @@ EOF
         cat <<EOF >>${nginxConfigPath}alone.conf
 server {
 	${nginxH2Conf}
-	server_name ${domain};
+
+	set_real_ip_from 0.0.0.0/0;
+    real_ip_header proxy_protocol;
+
+    server_name ${domain};
 	root ${nginxStaticPath};
 	location ~ ^/s/(clashMeta|default|clashMetaProfiles)/(.*) {
+	    proxy_set_header X-Real-IP \$proxy_protocol_addr;
         default_type 'text/plain; charset=utf-8';
         alias /etc/v2ray-agent/subscribe/\$1/\$2;
     }
@@ -1399,13 +1413,18 @@ EOF
         cat <<EOF >>${nginxConfigPath}alone.conf
 server {
 	${nginxH2Conf}
+
+	set_real_ip_from 0.0.0.0/0;
+    real_ip_header proxy_protocol;
+
 	server_name ${domain};
 	root ${nginxStaticPath};
 
     location ~ ^/s/(clashMeta|default|clashMetaProfiles)/(.*) {
-            default_type 'text/plain; charset=utf-8';
-            alias /etc/v2ray-agent/subscribe/\$1/\$2;
-        }
+        proxy_set_header X-Real-IP \$proxy_protocol_addr;
+        default_type 'text/plain; charset=utf-8';
+        alias /etc/v2ray-agent/subscribe/\$1/\$2;
+    }
 	location / {
 	}
 }
@@ -1414,13 +1433,18 @@ EOF
 
     cat <<EOF >>${nginxConfigPath}alone.conf
 server {
-	listen 127.0.0.1:31300;
+	listen 127.0.0.1:31300 proxy_protocol;
 	server_name ${domain};
+
+	set_real_ip_from 0.0.0.0/0;
+	real_ip_header proxy_protocol;
+
 	root ${nginxStaticPath};
 	location ~ ^/s/(clashMeta|default|clashMetaProfiles)/(.*) {
-            default_type 'text/plain; charset=utf-8';
-            alias /etc/v2ray-agent/subscribe/\$1/\$2;
-        }
+        proxy_set_header X-Real-IP \$proxy_protocol_addr;
+        default_type 'text/plain; charset=utf-8';
+        alias /etc/v2ray-agent/subscribe/\$1/\$2;
+    }
 	location / {
 	}
 }
@@ -3331,8 +3355,10 @@ EOF
     "outbounds":[
         {
             "protocol":"freedom",
-            "settings": {},
-            "tag":"direct"
+            "settings": {
+                "domainStrategy":"UseIP"
+            },
+            "tag":"${tag}"
         }
     ]
 }
@@ -3345,7 +3371,7 @@ EOF
     "outbounds":[
         {
             "protocol":"blackhole",
-            "tag":"blackhole_out"
+            "tag":"${tag}"
         }
     ]
 }
@@ -3358,7 +3384,7 @@ EOF
   "outbounds": [
     {
       "protocol": "socks",
-      "tag": "socks5_outbound",
+      "tag": "${tag}",
       "settings": {
         "servers": [
           {
@@ -3741,7 +3767,8 @@ initXrayConfig() {
 {
   "log": {
     "error": "/etc/v2ray-agent/xray/error.log",
-    "loglevel": "warning"
+    "loglevel": "warning",
+    "dnsLog": false
   }
 }
 EOF
@@ -3763,7 +3790,7 @@ EOF
 EOF
     fi
 
-    addXrayOutbound direct
+    addXrayOutbound "z_direct_outbound"
     # dns
     if [[ ! -f "/etc/v2ray-agent/xray/conf/11_dns.json" ]]; then
         cat <<EOF >/etc/v2ray-agent/xray/conf/11_dns.json
@@ -3777,8 +3804,7 @@ EOF
 EOF
     fi
     # routing
-    if [[ ! -f "/etc/v2ray-agent/xray/conf/09_routing.json" ]]; then
-        cat <<EOF >/etc/v2ray-agent/xray/conf/09_routing.json
+    cat <<EOF >/etc/v2ray-agent/xray/conf/09_routing.json
 {
   "routing": {
     "rules": [
@@ -3788,20 +3814,19 @@ EOF
           "domain:gstatic.com",
           "domain:googleapis.com"
         ],
-        "outboundTag": "direct"
+        "outboundTag": "z_direct_outbound"
       }
     ]
   }
 }
 EOF
-    fi
     # VLESS_TCP_TLS_Vision
     # 回落nginx
-    local fallbacksList='{"dest":31300,"xver":0},{"alpn":"h2","dest":31302,"xver":0}'
+    local fallbacksList='{"dest":31300,"xver":1},{"alpn":"h2","dest":31302,"xver":1}'
 
     # trojan
     if echo "${selectCustomInstallType}" | grep -q ",4," || [[ "$1" == "all" ]]; then
-        fallbacksList='{"dest":31296,"xver":1},{"alpn":"h2","dest":31302,"xver":0}'
+        fallbacksList='{"dest":31296,"xver":1},{"alpn":"h2","dest":31302,"xver":1}'
         cat <<EOF >/etc/v2ray-agent/xray/conf/04_trojan_TCP_inbounds.json
 {
 "inbounds":[
@@ -3953,6 +3978,7 @@ EOF
     elif [[ -z "$3" ]]; then
         rm /etc/v2ray-agent/xray/conf/06_VLESS_gRPC_inbounds.json >/dev/null 2>&1
     fi
+
     # VLESS Vision
     if echo "${selectCustomInstallType}" | grep -q ",0," || [[ "$1" == "all" ]]; then
 
@@ -4075,6 +4101,12 @@ EOF
         rm /etc/v2ray-agent/xray/conf/08_VLESS_vision_gRPC_inbounds.json >/dev/null 2>&1
     fi
     installSniffing
+    removeXrayOutbound IPv4_out
+    removeXrayOutbound IPv6_out
+    removeXrayOutbound blackhole_out
+    removeXrayOutbound wireguard_out_IPv6
+    removeXrayOutbound wireguard_out_IPv4
+    addXrayOutbound z_direct_outbound
 }
 
 # 初始化TCP Brutal
@@ -4403,6 +4435,15 @@ EOF
     elif [[ -z "$3" ]]; then
         rm /etc/v2ray-agent/sing-box/conf/config/10_naive_inbounds.json >/dev/null 2>&1
     fi
+    removeSingBoxConfig wireguard_out_IPv4
+    removeSingBoxConfig wireguard_out_IPv6
+    removeSingBoxConfig IPv4_out
+    removeSingBoxConfig IPv6_out
+    removeSingBoxConfig block
+    removeSingBoxConfig cn_block_outbound
+    removeSingBoxConfig cn_block_route
+    removeSingBoxConfig 01_direct_outbound
+    removeSingBoxConfig block_domain_outbound
 }
 # 初始化Xray Reality配置
 # 自定义CDN IP
@@ -5826,7 +5867,7 @@ ipv6Routing() {
 
         if [[ -n "${singBoxConfigPath}" ]]; then
             addSingBoxRouteRule "IPv6_out" "${domainList}" "IPv6_route"
-            addSingBoxOutbound direct
+            addSingBoxOutbound 01_direct_out
             addSingBoxOutbound IPv6_out
             addSingBoxOutbound IPv4_out
         fi
@@ -5880,7 +5921,7 @@ ipv6Routing() {
             unInstallRouting IPv6_out outboundTag
 
             removeXrayOutbound IPv6_out
-            addXrayOutbound direct
+            addXrayOutbound "z_direct_outbound"
 
         fi
 
@@ -6007,7 +6048,7 @@ blacklist() {
         if [[ -n "${singBoxConfigPath}" ]]; then
             addSingBoxRouteRule "block_domain_outbound" "${domainList}" "block_domain_route"
             addSingBoxOutbound "block_domain_outbound"
-            addSingBoxOutbound "direct"
+            addSingBoxOutbound "01_direct_outbound"
         fi
         echoContent green " ---> 添加完毕"
 
@@ -6022,7 +6063,7 @@ blacklist() {
         if [[ -n "${singBoxConfigPath}" ]]; then
             addSingBoxRouteRule "cn_block_outbound" "cn" "cn_block_route"
             addSingBoxOutbound "cn_block_outbound"
-            addSingBoxOutbound "direct"
+            addSingBoxOutbound "01_direct_outbound"
         fi
 
         echoContent green " ---> 屏蔽国内域名完毕"
@@ -6157,12 +6198,12 @@ unInstallSniffing() {
 installSniffing() {
     readInstallType
     if [[ "${coreInstallType}" == "1" ]]; then
-        find ${configPath} -name "*inbounds.json*" | awk -F "[c][o][n][f][/]" '{print $2}' | while read -r inbound; do
-            if ! grep -q "destOverride" <"${configPath}${inbound}"; then
-                sniffing=$(jq -r '.inbounds[0].sniffing = {"enabled":true,"destOverride":["http","tls","quic"]}' "${configPath}${inbound}")
-                echo "${sniffing}" | jq . >"${configPath}${inbound}"
+        if [[ -f "${configPath}02_VLESS_TCP_inbounds.json" ]]; then
+            if ! grep -q "destOverride" <"${configPath}02_VLESS_TCP_inbounds.json"; then
+                sniffing=$(jq -r '.inbounds[0].sniffing = {"enabled":true,"destOverride":["http","tls","quic"]}' "${configPath}02_VLESS_TCP_inbounds.json")
+                echo "${sniffing}" | jq . >"${configPath}02_VLESS_TCP_inbounds.json"
             fi
-        done
+        fi
     fi
 }
 
@@ -6227,7 +6268,7 @@ addWireGuardRoute() {
     # xray
     if [[ "${coreInstallType}" == "1" ]]; then
 
-        addInstallRouting wireguard_out_"${type}" "${tag}" "${domainList}"
+        addInstallRouting "wireguard_out_${type}" "${tag}" "${domainList}"
         addXrayOutbound "wireguard_out_${type}"
     fi
     # sing-box
@@ -6236,7 +6277,7 @@ addWireGuardRoute() {
         # rule
         addSingBoxRouteRule "wireguard_out_${type}" "${domainList}" "wireguard_out_${type}_route"
         addSingBoxOutbound "wireguard_out_${type}" "wireguard_out"
-        addSingBoxOutbound direct
+        addSingBoxOutbound "01_direct_outbound"
         # outbound
         addSingBoxWireGuardOut
     fi
@@ -6710,7 +6751,7 @@ initSingBoxRules() {
         geositeStatus=$(curl -s "https://api.github.com/repos/SagerNet/sing-geosite/contents/geosite-${line}.srs?ref=rule-set" | jq .message)
 
         if [[ "${geositeStatus}" == "null" ]]; then
-            ruleSet=$(echo "${ruleSet}" | jq -r ". += [{\"tag\":\"${line}_$2\",\"type\":\"remote\",\"format\":\"binary\",\"url\":\"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-${line}.srs\",\"download_detour\":\"direct\"}]")
+            ruleSet=$(echo "${ruleSet}" | jq -r ". += [{\"tag\":\"${line}_$2\",\"type\":\"remote\",\"format\":\"binary\",\"url\":\"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-${line}.srs\",\"download_detour\":\"01_direct_outbound\"}]")
         else
             domainRules=$(echo "${domainRules}" | jq -r ". += [\"${line}\"]")
         fi
@@ -6752,7 +6793,7 @@ setSocks5InboundRouting() {
 
     read -r -p "是否允许所有网站？请选择[y/n]:" socks5InboundRoutingDomainStatus
     if [[ "${socks5InboundRoutingDomainStatus}" == "y" ]]; then
-        addSingBoxOutbound direct
+        addSingBoxOutbound "01_direct_outbound"
     else
         echoContent yellow "录入示例:netflix,openai,v2ray-agent.com\n"
         read -r -p "域名:" socks5InboundRoutingDomain
@@ -6760,14 +6801,14 @@ setSocks5InboundRouting() {
             echoContent red " ---> 域名不可为空"
             exit 0
         fi
-        addSingBoxRouteRule "direct" "${socks5InboundRoutingDomain}" "socks5_inbound_route"
+        addSingBoxRouteRule "01_direct_outbound" "${socks5InboundRoutingDomain}" "socks5_inbound_route"
         local route=
         route=$(jq ".route.rules[0].inbound = [\"socks5_inbound\"]" "${singBoxConfigPath}socks5_inbound_route.json")
         route=$(echo "${route}" | jq ".route.rules[0].source_ip_cidr=${socks5InboundRoutingIPs}")
         echo "${route}" | jq . >"${singBoxConfigPath}socks5_inbound_route.json"
 
         addSingBoxOutbound block
-        addSingBoxOutbound direct
+        addSingBoxOutbound "01_direct_outbound"
     fi
 
 }
@@ -6844,7 +6885,7 @@ setSocks5OutboundRouting() {
         exit 0
     fi
     addSingBoxRouteRule "socks5_outbound" "${socks5RoutingOutboundDomain}" "socks5_outbound_route"
-    addSingBoxOutbound direct
+    addSingBoxOutbound "01_direct_outbound"
 
     if [[ "${coreInstallType}" == "1" ]]; then
 
@@ -7579,6 +7620,7 @@ installSubscribe() {
     local nginxSubscribeSSL=
     local serverName=
     local SSLType=
+    local listenIPv6=
 
     if [[ "${coreInstallType}" == "2" || "${selectCoreType}" == "2" ]] && [[ -z "${subscribePort}" ]]; then
 
@@ -7605,7 +7647,6 @@ installSubscribe() {
                 echoContent yellow " ---> 退出安装"
                 exit
             fi
-            #           ipv6 listen [::]:${result[-1]};
         else
             local subscribeServerName=
             if [[ -n "${currentHost}" ]]; then
@@ -7618,11 +7659,13 @@ installSubscribe() {
             serverName="server_name ${subscribeServerName};"
             nginxSubscribeSSL="ssl_certificate /etc/v2ray-agent/tls/${subscribeServerName}.crt;ssl_certificate_key /etc/v2ray-agent/tls/${subscribeServerName}.key;"
         fi
-
+        if [[ -n "$(curl -s -6 http://www.cloudflare.com/cdn-cgi/trace | grep "ip" | cut -d "=" -f 2)" ]]; then
+            listenIPv6="listen [::]:${result[-1]};"
+        fi
         if echo "${nginxVersion}" | grep -q "1.25" && [[ $(echo "${nginxVersion}" | awk -F "[.]" '{print $3}') -gt 0 ]]; then
-            nginxSubscribeListen="listen ${result[-1]} ${SSLType} so_keepalive=on;http2 on;"
+            nginxSubscribeListen="listen ${result[-1]} ${SSLType} so_keepalive=on;http2 on;${listenIPv6}"
         else
-            nginxSubscribeListen="listen ${result[-1]} ${SSLType} http2 so_keepalive=on;"
+            nginxSubscribeListen="listen ${result[-1]} ${SSLType} http2 so_keepalive=on;${listenIPv6}"
         fi
 
         cat <<EOF >${nginxConfigPath}subscribe.conf
@@ -8698,7 +8741,7 @@ menu() {
     cd "$HOME" || exit
     echoContent red "\n=============================================================="
     echoContent green "作者：mack-a"
-    echoContent green "当前版本：v3.2.2"
+    echoContent green "当前版本：v3.2.8"
     echoContent green "Github：https://github.com/mack-a/v2ray-agent"
     echoContent green "描述：八合一共存脚本\c"
     showInstallStatus
