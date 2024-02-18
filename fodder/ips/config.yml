@@ -43,7 +43,8 @@ proxy-groups:
     proxies:
       - bart
       - vmiss
-      - vmiss_hysteria
+      - vmiss_vision
+      - vmiss_gRPC
       - bart_vision
       - bart_gRPC
     url: "https://cp.cloudflare.com/generate_204"
@@ -194,42 +195,38 @@ proxies:
     type: vless
     server: 45.93.28.208
     port: 443
-    uuid: 4f17dca2-f67d-4a9c-8bec-fab0160f5f09
+    uuid: a578aa57-b573-4f96-9e93-49a8dbcd526c
     network: tcp
     tls: true
     udp: true
     flow: xtls-rprx-vision
-    servername: vmiss.howies.live
+    servername: swdist.apple.com
     reality-opts:
-      public-key: CPQoSrhCSPCH7VH26ozE7stujTwyFv-hH9vyjJeEECE
+      public-key: gnmVgFYKoGj-vw5jmQ8M3BTvPEtULh7Ac6s1JHSoVi0
      # short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome # cannot be empty
-  - name: "vmiss_hysteria"
-    type: hysteria2
-    server: vmiss.howies.live
-    port: 23221
-    password: 4f17dca2-f67d-4a9c-8bec-fab0160f5f09
-    # obfs: salamander # 默认为空，如果填写则开启obfs，目前仅支持salamander
-    # obfs-password: yourpassword
-    sni: vmiss.howies.live
-    # skip-cert-verify: false
-    # fingerprint: xxxx
-    alpn:
-      - h3
-    # ca: "./my.ca"
-    # ca-str: "xyz"
-  - name: "bart_hysteria"
-    type: hysteria2
-    server: 156.251.130.60
-    port: 13960
-    password: 72c855d6-293e-4afa-9009-60b6a9ed781d4f17dca2-f67d-4a9c-8bec-fab0160f5f09
-    # obfs: salamander # 默认为空，如果填写则开启obfs，目前仅支持salamander
-    # obfs-password: yourpassword
-    sni: bart.howies.live
-    # skip-cert-verify: false
-    # fingerprint: xxxx
-    alpn:
-      - h3
+  - name: "vmiss_vision"
+    type: vless
+    server: vmiss.howiesyu.link
+    port: 443
+    uuid: a578aa57-b573-4f96-9e93-49a8dbcd526c
+    network: tcp
+    tls: true
+    flow: xtls-rprx-vision
+    client-fingerprint: chrome
+  - name: "vmiss_gRPC"
+    type: vless
+    server: 45.93.28.208
+    port: 443
+    uuid: a578aa57-b573-4f96-9e93-49a8dbcd526c
+    network: grpc
+    tls: true
+    servername: "swdist.apple.com"
+    grpc-opts:
+      grpc-service-name: "grpc"
+    reality-opts:
+      public-key: gnmVgFYKoGj-vw5jmQ8M3BTvPEtULh7Ac6s1JHSoVi0
+    client-fingerprint: chrome
 
 
 rules:
