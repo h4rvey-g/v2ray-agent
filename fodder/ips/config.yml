@@ -194,13 +194,13 @@ proxies:
   - name: "vmiss"
     type: vless
     server: 45.93.28.208
-    port: 443
+    port: 19670
     uuid: a578aa57-b573-4f96-9e93-49a8dbcd526c
     network: tcp
     tls: true
     udp: true
     flow: xtls-rprx-vision
-    servername: swdist.apple.com
+    servername: www.amd.com
     reality-opts:
       public-key: gnmVgFYKoGj-vw5jmQ8M3BTvPEtULh7Ac6s1JHSoVi0
      # short-id: 6ba85179e30d4fc2
@@ -217,11 +217,11 @@ proxies:
   - name: "vmiss_gRPC"
     type: vless
     server: 45.93.28.208
-    port: 443
+    port: 19670
     uuid: a578aa57-b573-4f96-9e93-49a8dbcd526c
     network: grpc
     tls: true
-    servername: "swdist.apple.com"
+    servername: www.amd.com
     grpc-opts:
       grpc-service-name: "grpc"
     reality-opts:
@@ -292,6 +292,7 @@ rules:
   - GEOIP,cn,DIRECT,no-resolve
   - GEOIP,private,DIRECT,no-resolve
   - IP-CIDR,156.251.130.60/32,DIRECT,no-resolve
+  - IP-CIDR,45.93.28.208/32,DIRECT,no-resolve
   - IP-CIDR,223.5.5.5/32,DIRECT,no-resolve
   - IP-CIDR,119.29.29.29/32,DIRECT,no-resolve
   - IP-CIDR,180.76.76.76/32,DIRECT,no-resolve
