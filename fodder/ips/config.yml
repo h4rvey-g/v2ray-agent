@@ -265,6 +265,7 @@ rules:
   - DOMAIN-SUFFIX,oaiusercontent.com,bart_all
   - DOMAIN-SUFFIX,coze.com,bart_all
   - GEOSITE,paypal,bart_all
+  - GEOSITE,category-entertainment,auto_all
   - GEOSITE,google,auto_xray_only
   - GEOSITE,github,bart_vision
   - PROCESS-NAME,Obsidian.exe,bart_vision
@@ -288,7 +289,7 @@ rules:
   - GEOSITE,tld-cn,DIRECT
   - GEOSITE,category-games@cn,DIRECT
   - GEOSITE,steam,bart_all
-  - GEOSITE,geolocation-!cn,auto_xray_only
+  - GEOSITE,geolocation-!cn,auto_all
   - GEOIP,cn,DIRECT,no-resolve
   - GEOIP,private,DIRECT,no-resolve
   - IP-CIDR,156.251.130.60/32,DIRECT,no-resolve
