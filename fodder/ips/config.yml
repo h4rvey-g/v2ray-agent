@@ -34,8 +34,11 @@ proxy-groups:
     type: url-test
     proxies:
       - bart
+      - bart_gRPC
       - vmiss
+      - vmiss_gRPC
       - vmiss-jp
+      - vmiss-jp_gRPC
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
     tolerance: 50
@@ -243,38 +246,41 @@ proxies:
   - name: "vmiss-jp"
     type: vless
     server: 38.47.109.238
-    port: 443
-    uuid: b8be1d3a-ea83-4f25-b05b-f21789a3ba5a
+    port: 26219
+    uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
     network: tcp
     tls: true
     udp: true
     flow: xtls-rprx-vision
-    servername: m.media-amazon.com
+    servername: vmjp.howiesyu.link
     reality-opts:
-      public-key: JNWfjwuoArf2gyVUiUmRdNARmhr5KGgKkpy4YKVtnkE
+      public-key: Aa3NxXxliBETLyrR4-Jph0PyilCjrtkgn1iXnH27mFk
      # short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome # cannot be empty
   - name: "vmiss-jp_vision"
     type: vless
     server: vmjp.howiesyu.link
-    port: 443
-    uuid: b8be1d3a-ea83-4f25-b05b-f21789a3ba5a
+    port: 15477
+    uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
     network: tcp
     tls: true
+    udp: false
+    xudp: false
     flow: xtls-rprx-vision
     client-fingerprint: chrome
   - name: "vmiss-jp_gRPC"
     type: vless
     server: 38.47.109.238
-    port: 443
-    uuid: b8be1d3a-ea83-4f25-b05b-f21789a3ba5a
+    port: 26219
+    uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
     network: grpc
     tls: true
-    servername: m.media-amazon.com
+    servername: vmjp.howiesyu.link
     grpc-opts:
       grpc-service-name: "grpc"
     reality-opts:
-      public-key: JNWfjwuoArf2gyVUiUmRdNARmhr5KGgKkpy4YKVtnkE
+      public-key: Aa3NxXxliBETLyrR4-Jph0PyilCjrtkgn1iXnH27mFk
+      short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome
 
 
