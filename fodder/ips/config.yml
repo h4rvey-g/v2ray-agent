@@ -35,6 +35,7 @@ proxy-groups:
     proxies:
       - bart
       - vmiss
+      - vmiss-jp
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
     tolerance: 50
@@ -43,10 +44,13 @@ proxy-groups:
     proxies:
       - bart
       - vmiss
+      - vmiss-jp
       - vmiss_vision
       - vmiss_gRPC
       - bart_vision
       - bart_gRPC
+      - vmiss-jp_vision
+      - vmiss-jp_gRPC
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
     tolerance: 50
@@ -59,6 +63,15 @@ proxy-groups:
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
     tolerance: 50
+  - name: "vision_only"
+    type: load-balance
+    proxies:
+      - bart_vision
+      - vmiss_vision
+      - vmiss-jp_vision
+    url: "https://cp.cloudflare.com/generate_204"
+    interval: 60
+    strategy: consistent-hashing
 # profile:
 #   store-selected: true
 #   store-fake-ip: true
@@ -227,6 +240,42 @@ proxies:
     reality-opts:
       public-key: gnmVgFYKoGj-vw5jmQ8M3BTvPEtULh7Ac6s1JHSoVi0
     client-fingerprint: chrome
+  - name: "vmiss-jp"
+    type: vless
+    server: 38.47.109.238
+    port: 443
+    uuid: b8be1d3a-ea83-4f25-b05b-f21789a3ba5a
+    network: tcp
+    tls: true
+    udp: true
+    flow: xtls-rprx-vision
+    servername: m.media-amazon.com
+    reality-opts:
+      public-key: JNWfjwuoArf2gyVUiUmRdNARmhr5KGgKkpy4YKVtnkE
+     # short-id: 6ba85179e30d4fc2
+    client-fingerprint: chrome # cannot be empty
+  - name: "vmiss-jp_vision"
+    type: vless
+    server: vmjp.howiesyu.link
+    port: 443
+    uuid: b8be1d3a-ea83-4f25-b05b-f21789a3ba5a
+    network: tcp
+    tls: true
+    flow: xtls-rprx-vision
+    client-fingerprint: chrome
+  - name: "vmiss-jp_gRPC"
+    type: vless
+    server: 38.47.109.238
+    port: 443
+    uuid: b8be1d3a-ea83-4f25-b05b-f21789a3ba5a
+    network: grpc
+    tls: true
+    servername: m.media-amazon.com
+    grpc-opts:
+      grpc-service-name: "grpc"
+    reality-opts:
+      public-key: JNWfjwuoArf2gyVUiUmRdNARmhr5KGgKkpy4YKVtnkE
+    client-fingerprint: chrome
 
 
 rules:
@@ -267,8 +316,8 @@ rules:
   - GEOSITE,paypal,bart_all
   - GEOSITE,category-entertainment,auto_all
   - GEOSITE,google,auto_xray_only
-  - GEOSITE,github,bart_vision
-  - PROCESS-NAME,Obsidian.exe,bart_vision
+  - GEOSITE,github,vision_only
+  - PROCESS-NAME,Obsidian.exe,vision_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN-SUFFIX,usegalaxy.org,DIRECT
   - DOMAIN-SUFFIX,misakaf.org,auto_all
@@ -288,7 +337,6 @@ rules:
   - GEOSITE,google-cn,DIRECT
   - GEOSITE,tld-cn,DIRECT
   - GEOSITE,category-games@cn,DIRECT
-  - GEOSITE,steam,bart_all
   - GEOSITE,geolocation-!cn,auto_all
   - GEOIP,cn,DIRECT,no-resolve
   - GEOIP,private,DIRECT,no-resolve
@@ -307,6 +355,6 @@ sub-rules:
   sub-browser:
     - GEOSITE,paypal,bart_all
     - GEOSITE,openai,bart_all
-    - GEOSITE,github,bart_vision
-    - GEOSITE,steam,bart_all
+    - GEOSITE,github,vision_only
     - GEOSITE,category-entertainment,auto_all
+    - MATCH,auto_all
