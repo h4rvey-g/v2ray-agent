@@ -93,7 +93,7 @@ dns:
   nameserver-policy:
    'spcnwikia.top': 'https://dns.alidns.com/dns-query'
    '+.xjtu.edu.cn': 'https://dns.alidns.com/dns-query'
-   'geosite:china-list': 'https://dns.alidns.com/dns-query'
+   'geosite:china-list': ['https://dns.alidns.com/dns-query','https://doh.pub/dns-query']
    '+.howies.live': 'https://deans.howiesyu.link'
    '+.closeai.biz': 'https://deans.howiesyu.link'
    '+.fakeopenai.cn': 'https://deans.howiesyu.link'
@@ -176,20 +176,20 @@ proxies:
   - name: "bart"
     type: vless
     server: 156.251.130.60
-    port: 26047
-    uuid: 72c855d6-293e-4afa-9009-60b6a9ed781d
+    port: 20084
+    uuid: 0d96e97a-6ffa-459f-9b51-fd963dfcfba6
     network: tcp
     tls: true
     flow: xtls-rprx-vision
-    servername: "one-piece.com"
+    servername: "www.lovelive-anime.jp"
     reality-opts:
-      public-key: PsUToXo9s6wa7I55tPQqOtDQzDMtAdZTGJHIpJZ6Ejw
+      public-key: O5q0G2vl3rwjXfOK_2yfQeqpjUejaoLwwoaFxEOjPmU
     client-fingerprint: chrome
   - name: "bart_vision"
     type: vless
-    server: bart.howies.live
-    port: 10963
-    uuid: 72c855d6-293e-4afa-9009-60b6a9ed781d
+    server: bart.howiesyu.link
+    port: 443
+    uuid: 0d96e97a-6ffa-459f-9b51-fd963dfcfba6
     network: tcp
     tls: true
     flow: xtls-rprx-vision
@@ -197,15 +197,15 @@ proxies:
   - name: "bart_gRPC"
     type: vless
     server: 156.251.130.60
-    port: 26047
-    uuid: 72c855d6-293e-4afa-9009-60b6a9ed781d
+    port: 20084
+    uuid: 0d96e97a-6ffa-459f-9b51-fd963dfcfba6
     network: grpc
     tls: true
-    servername: "one-piece.com"
+    servername: "www.lovelive-anime.jp"
     grpc-opts:
       grpc-service-name: "grpc"
     reality-opts:
-      public-key: PsUToXo9s6wa7I55tPQqOtDQzDMtAdZTGJHIpJZ6Ejw
+      public-key: O5q0G2vl3rwjXfOK_2yfQeqpjUejaoLwwoaFxEOjPmU
     client-fingerprint: chrome
   - name: "vmiss"
     type: vless
