@@ -37,6 +37,8 @@ proxy-groups:
       - bart_gRPC
       - vmiss-jp
       - vmiss-jp_gRPC
+      - bww
+      - bww_gRPC
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
     tolerance: 50
@@ -45,10 +47,13 @@ proxy-groups:
     proxies:
       - bart
       - vmiss-jp
+      - bww
       - bart_vision
       - bart_gRPC
       - vmiss-jp_vision
       - vmiss-jp_gRPC
+      - bww_vision
+      - bww_gRPC
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
     tolerance: 50
@@ -66,6 +71,7 @@ proxy-groups:
     proxies:
       - bart_vision
       - vmiss-jp_vision
+      - bww_vision
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
     strategy: consistent-hashing
@@ -88,7 +94,7 @@ dns:
    'spcnwikia.top': 'https://dns.alidns.com/dns-query'
    '+.xjtu.edu.cn': 'https://dns.alidns.com/dns-query'
    'geosite:china-list': ['https://dns.alidns.com/dns-query','https://doh.pub/dns-query']
-   '+.howies.live': 'https://deans.howiesyu.link'
+   '+.howiesyu.link': 'https://dns.alidns.com/dns-query'
    '+.closeai.biz': 'https://deans.howiesyu.link'
    '+.fakeopenai.cn': 'https://deans.howiesyu.link'
    '+.acadwrite.cn': 'https://deans.howiesyu.link'
@@ -241,11 +247,48 @@ proxies:
       public-key: Aa3NxXxliBETLyrR4-Jph0PyilCjrtkgn1iXnH27mFk
       short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome
-
+  - name: "bww"
+    type: vless
+    server: 212.50.254.87
+    port: 15326
+    uuid: da3d3cbf-e0cd-45af-aa63-c2d552c84915
+    network: tcp
+    tls: true
+    udp: true
+    flow: xtls-rprx-vision
+    servername: itunes.apple.com
+    reality-opts:
+      public-key: Ozjp-cGsogubHLomaTthbOpNu3YyLe1yLOV7t5xNGwM
+     # short-id: 6ba85179e30d4fc2
+    client-fingerprint: chrome # cannot be empty
+  - name: "bww_vision"
+    type: vless
+    server: bww.howiesyu.link
+    port: 443
+    uuid: da3d3cbf-e0cd-45af-aa63-c2d552c84915
+    network: tcp
+    tls: true
+    udp: true
+    flow: xtls-rprx-vision
+    client-fingerprint: chrome
+  - name: "bww_gRPC"
+    type: vless
+    server: 212.50.254.87
+    port: 15326
+    uuid: da3d3cbf-e0cd-45af-aa63-c2d552c84915
+    network: grpc
+    tls: true
+    servername: itunes.apple.com
+    grpc-opts:
+      grpc-service-name: "grpc"
+    reality-opts:
+      public-key: Ozjp-cGsogubHLomaTthbOpNu3YyLe1yLOV7t5xNGwM
+      short-id: 6ba85179e30d4fc2
+    client-fingerprint: chrome
 
 rules:
   ############################# 自定义 #############################
-  - GEOSITE,category-ads-all,REJECT
+  # - GEOSITE,category-ads-all,REJECT
   ############################# Adobe activation ##################
   - GEOSITE,adobe-activation,REJECT
   - DOMAIN-SUFFIX,ic.adobe.io,REJECT
