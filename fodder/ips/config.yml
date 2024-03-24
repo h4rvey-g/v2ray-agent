@@ -331,7 +331,7 @@ rules:
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN-SUFFIX,usegalaxy.org,DIRECT
   - DOMAIN-SUFFIX,misakaf.org,auto_all
-  - DOMAIN-KEYWORD,bing,bart_all
+  - DOMAIN-KEYWORD,bing,vision_only
   - GEOSITE,bing,bart_all
   - GEOSITE,spotify,bart_all
   - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
