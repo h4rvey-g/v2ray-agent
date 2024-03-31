@@ -286,9 +286,18 @@ proxies:
       short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome
 
+rule-providers:
+  gemini:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./ruleset/gemini.yaml
+    url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Gemini/Gemini.yaml"
+    interval: 600
+
 rules:
   ############################# 自定义 #############################
-  # - GEOSITE,category-ads-all,REJECT
+  - GEOSITE,category-ads-all,REJECT
   ############################# Adobe activation ##################
   - GEOSITE,adobe-activation,REJECT
   - DOMAIN-SUFFIX,ic.adobe.io,REJECT
@@ -317,11 +326,10 @@ rules:
   - AND,((PROCESS-NAME,Illustrator.exe),(DOMAIN-SUFFIX,adobe.io)),REJECT
  ############################# End Adobe activation ##################
   - SUB-RULE,(SRC-PORT,10801),sub-browser
+  - RULE-SET,gemini,bart_all
   - DOMAIN-KEYWORD,18comic,bart_all
   - DOMAIN-SUFFIX,kox.moe,vision_only
   - GEOSITE,openai,bart_all
-  - DOMAIN-SUFFIX,bard.google.com,bart_all
-  - DOMAIN-SUFFIX,oaiusercontent.com,bart_all
   - DOMAIN-SUFFIX,coze.com,bart_all
   - GEOSITE,paypal,bart_all
   - GEOSITE,category-entertainment,auto_all
