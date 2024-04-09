@@ -118,6 +118,8 @@ dns:
    - https://deans.howiesyu.link/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
    - https://max.rethinkdns.com/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
    - https://sky.rethinkdns.com/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
+   - 8.8.8.8
+   - 1.1.1.1
   fallback-filter:
     geoip: true
     geoip-code: CN
@@ -332,8 +334,10 @@ rules:
   - GEOSITE,openai,bart_all
   - DOMAIN-SUFFIX,coze.com,bart_all
   - GEOSITE,paypal,bart_all
+  - GEOSITE,category-games@cn,DIRECT
   - GEOSITE,category-entertainment,auto_all
   - GEOSITE,google,auto_xray_only
+  - GEOIP,github,vision_only
   - GEOSITE,github,vision_only
   - PROCESS-NAME,Obsidian.exe,vision_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
@@ -355,7 +359,6 @@ rules:
   - GEOSITE,apple-cn,DIRECT
   - GEOSITE,google-cn,DIRECT
   - GEOSITE,tld-cn,DIRECT
-  - GEOSITE,category-games@cn,DIRECT
   - GEOSITE,geolocation-!cn,auto_all
   - GEOIP,cn,DIRECT,no-resolve
   - GEOIP,private,DIRECT,no-resolve
