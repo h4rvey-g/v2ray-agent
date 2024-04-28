@@ -35,8 +35,8 @@ proxy-groups:
     proxies:
       - bart
       - bart_gRPC
-      - vmiss-jp
-      - vmiss-jp_gRPC
+      # - vmiss-jp
+      # - vmiss-jp_gRPC
       - bww
       - bww_gRPC
     url: "https://cp.cloudflare.com/generate_204"
@@ -46,12 +46,12 @@ proxy-groups:
     type: url-test
     proxies:
       - bart
-      - vmiss-jp
+      # - vmiss-jp
       - bww
       - bart_vision
       - bart_gRPC
-      - vmiss-jp_vision
-      - vmiss-jp_gRPC
+      # - vmiss-jp_vision
+      # - vmiss-jp_gRPC
       - bww_vision
       - bww_gRPC
     url: "https://cp.cloudflare.com/generate_204"
@@ -70,7 +70,7 @@ proxy-groups:
     type: load-balance
     proxies:
       - bart_vision
-      - vmiss-jp_vision
+      # - vmiss-jp_vision
       - bww_vision
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
@@ -210,45 +210,45 @@ proxies:
     reality-opts:
       public-key: O5q0G2vl3rwjXfOK_2yfQeqpjUejaoLwwoaFxEOjPmU
     client-fingerprint: chrome
-  - name: "vmiss-jp"
-    type: vless
-    server: 38.47.109.238
-    port: 26219
-    uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
-    network: tcp
-    tls: true
-    udp: true
-    flow: xtls-rprx-vision
-    servername: vmjp.howiesyu.link
-    reality-opts:
-      public-key: Aa3NxXxliBETLyrR4-Jph0PyilCjrtkgn1iXnH27mFk
-     # short-id: 6ba85179e30d4fc2
-    client-fingerprint: chrome # cannot be empty
-  - name: "vmiss-jp_vision"
-    type: vless
-    server: vmjp.howiesyu.link
-    port: 15477
-    uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
-    network: tcp
-    tls: true
-    udp: false
-    xudp: false
-    flow: xtls-rprx-vision
-    client-fingerprint: chrome
-  - name: "vmiss-jp_gRPC"
-    type: vless
-    server: 38.47.109.238
-    port: 26219
-    uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
-    network: grpc
-    tls: true
-    servername: vmjp.howiesyu.link
-    grpc-opts:
-      grpc-service-name: "grpc"
-    reality-opts:
-      public-key: Aa3NxXxliBETLyrR4-Jph0PyilCjrtkgn1iXnH27mFk
-      short-id: 6ba85179e30d4fc2
-    client-fingerprint: chrome
+  # - name: "vmiss-jp"
+  #   type: vless
+  #   server: 38.47.109.238
+  #   port: 26219
+  #   uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
+  #   network: tcp
+  #   tls: true
+  #   udp: true
+  #   flow: xtls-rprx-vision
+  #   servername: vmjp.howiesyu.link
+  #   reality-opts:
+  #     public-key: Aa3NxXxliBETLyrR4-Jph0PyilCjrtkgn1iXnH27mFk
+  #    # short-id: 6ba85179e30d4fc2
+  #   client-fingerprint: chrome # cannot be empty
+  # - name: "vmiss-jp_vision"
+  #   type: vless
+  #   server: vmjp.howiesyu.link
+  #   port: 15477
+  #   uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
+  #   network: tcp
+  #   tls: true
+  #   udp: false
+  #   xudp: false
+  #   flow: xtls-rprx-vision
+  #   client-fingerprint: chrome
+  # - name: "vmiss-jp_gRPC"
+  #   type: vless
+  #   server: 38.47.109.238
+  #   port: 26219
+  #   uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
+  #   network: grpc
+  #   tls: true
+  #   servername: vmjp.howiesyu.link
+  #   grpc-opts:
+  #     grpc-service-name: "grpc"
+  #   reality-opts:
+  #     public-key: Aa3NxXxliBETLyrR4-Jph0PyilCjrtkgn1iXnH27mFk
+  #     short-id: 6ba85179e30d4fc2
+  #   client-fingerprint: chrome
   - name: "bww"
     type: vless
     server: 212.50.254.87
