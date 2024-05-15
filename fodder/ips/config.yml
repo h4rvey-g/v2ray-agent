@@ -94,7 +94,7 @@ dns:
    'spcnwikia.top': 'https://dns.alidns.com/dns-query'
    '+.xjtu.edu.cn': 'https://dns.alidns.com/dns-query'
    'geosite:china-list': ['https://dns.alidns.com/dns-query','https://doh.pub/dns-query']
-   '+.howiesyu.link': 'https://dns.alidns.com/dns-query'
+   '+.howiesyu.link': '223.5.5.5'
    '+.closeai.biz': 'https://deans.howiesyu.link'
    '+.fakeopenai.cn': 'https://deans.howiesyu.link'
    '+.acadwrite.cn': 'https://deans.howiesyu.link'
@@ -296,6 +296,12 @@ rule-providers:
     path: ./ruleset/gemini.yaml
     url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Gemini/Gemini.yaml"
     interval: 600
+  ChatGPT:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/G4free/clash-ruleset/main/ruleset/ChatGPT.yaml"
+    path: ./ruleset/ChatGPT.yaml
+    interval: 86400
 
 rules:
   ############################# 自定义 #############################
@@ -329,9 +335,10 @@ rules:
  ############################# End Adobe activation ##################
   - SUB-RULE,(SRC-PORT,10801),sub-browser
   - RULE-SET,gemini,bart_all
+  - RULE-SET,ChatGPT,bww_gRPC
   - DOMAIN-KEYWORD,18comic,bart_all
   - DOMAIN-SUFFIX,kox.moe,vision_only
-  - GEOSITE,openai,bart_all
+  - GEOSITE,openai,bww_gRPC
   - DOMAIN-SUFFIX,coze.com,bart_all
   - GEOSITE,paypal,bart_all
   - GEOSITE,category-games@cn,DIRECT
@@ -376,7 +383,7 @@ rules:
 sub-rules:
   sub-browser:
     - GEOSITE,paypal,bart_all
-    - GEOSITE,openai,bart_all
+    - GEOSITE,openai,bww_gRPC
     - GEOSITE,github,vision_only
     - GEOSITE,category-entertainment,auto_all
     - DOMAIN-SUFFIX,kox.moe,vision_only
