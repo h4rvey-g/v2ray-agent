@@ -1,0 +1,410 @@
+mixed-port: 10801
+allow-lan: true
+mode: rule
+log-level: debug
+external-controller: :9090
+geox-url:
+  geoip: "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
+  geosite: "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat"
+global-client-fingerprint: chrome
+# interface-name: WLAN
+ipv6: false
+
+tun:
+  enable: true
+  device: meta              #MacOS建议删除此项
+  stack: system             #system / gvisor / lwip liwp仅为1.13.2以上的功能
+  dns-hijack:
+    - any:53
+    - tcp://any:53
+  auto-route: true
+  auto-detect-interface: false
+  include-interface: 
+    - WLAN
+    - WLAN 2
+  # mtu: 9000               #最大传输单元
+  # strict_route: true      #将所有连接路由到tun来防止泄漏，但你的设备将无法其他设备被访问
+  # inet4_route_address:      #启用 auto_route 时使用自定义路由而不是默认路由
+  #   - 0.0.0.0/1
+  #   - 128.0.0.0/1
+  # inet6_route_address:      #启用 auto_route 时使用自定义路由而不是默认路由
+  #   - '::/1'
+  #   - '8000::/1'
+
+proxy-groups:
+  # url-test 将按照 url 测试结果使用延迟最低节点
+  - name: "auto_xray_only"
+    type: url-test
+    proxies:
+      - bart
+      - bart_gRPC
+      # - vmiss-jp
+      # - vmiss-jp_gRPC
+      - bww
+      - bww_gRPC
+    url: "https://cp.cloudflare.com/generate_204"
+    interval: 60
+    tolerance: 50
+  - name: "auto_all"
+    type: url-test
+    proxies:
+      - bart
+      # - vmiss-jp
+      - bww
+      - bart_vision
+      - bart_gRPC
+      # - vmiss-jp_vision
+      # - vmiss-jp_gRPC
+      - bww_vision
+      - bww_gRPC
+    url: "https://cp.cloudflare.com/generate_204"
+    interval: 60
+    tolerance: 50
+  - name: "bart_all"
+    type: url-test
+    proxies:
+      - bart
+      - bart_vision
+      - bart_gRPC
+    url: "https://cp.cloudflare.com/generate_204"
+    interval: 60
+    tolerance: 50
+  - name: "vision_only"
+    type: load-balance
+    proxies:
+      - bart_vision
+      # - vmiss-jp_vision
+      - bww_vision
+    url: "https://cp.cloudflare.com/generate_204"
+    interval: 60
+    strategy: consistent-hashing
+# profile:
+#   store-selected: true
+#   store-fake-ip: true
+# DNS 服务器配置(可选；若不配置，程序内置的 DNS 服务会被关闭)
+dns:
+  enable: true # 是否启用dns false
+  ipv6: false
+  prefer-h3: true
+  listen: 0.0.0.0:1053
+  enhanced-mode: fake-ip # 模式：redir-host或fake-ip
+  # use-hosts: true 
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver: 
+    - 8.8.8.8
+    - 1.1.1.1
+  nameserver-policy:
+   'spcnwikia.top': 'https://dns.alidns.com/dns-query'
+   '+.xjtu.edu.cn': 'https://dns.alidns.com/dns-query'
+   'geosite:china-list': ['https://dns.alidns.com/dns-query','https://doh.pub/dns-query']
+   '+.howiesyu.link': '223.5.5.5'
+   '+.closeai.biz': 'https://deans.howiesyu.link'
+   '+.fakeopenai.cn': 'https://deans.howiesyu.link'
+   '+.acadwrite.cn': 'https://deans.howiesyu.link'
+   'geosite:github' : 'https://deans.howiesyu.link'
+   'detectportal.firefox.com' : 'https://deans.howiesyu.link'
+   'geosite:openai': 'https://deans.howiesyu.link'
+   'geosite:bing': 'https://deans.howiesyu.link'
+   'bingapis.com': 'https://deans.howiesyu.link'
+   '+.bing.com': 'https://deans.howiesyu.link'
+   'geosite:gfw': 'https://deans.howiesyu.link'
+  #  '+.internal.crop.com': '10.0.0.1'
+  #  'geosite:cn': https://doh.pub/dns-query
+  #  'geosite:geolocation-!cn': [tls://8.8.4.4, https://1.0.0.1/dns-query]
+  #  "www.baidu.com,+.google.cn": [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
+  #  "geosite:private,apple": [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
+  nameserver:
+   - https://doh.pub/dns-query
+   - https://dns.alidns.com/dns-query
+  fallback:
+   - https://1.1.1.1/dns-query
+   - https://deans.howiesyu.link/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
+   - https://max.rethinkdns.com/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
+   - https://sky.rethinkdns.com/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
+   - 8.8.8.8
+   - 1.1.1.1
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+    domain:
+      - '+.google.com'
+      - '+.facebook.com'
+      - '+.youtube.com'
+  # 配置不使用 fake-ip 的域名
+  fake-ip-filter:
+    - "*.lan"
+    # QQ Loopback
+    - localhost.sec.qq.com
+    - localhost.ptlogin2.qq.com
+    - "+.linksys.com"
+    - "+.pool.ntp.org"
+    # Router
+    - hiwifi.com
+    - leike.cc
+    - miwifi.com
+    - my.router
+    - peiluyou.com
+    - phicomm.me
+    - router.ctc
+    - routerlogin.com
+      # Tenda router
+    - tendawifi.com
+      # TP-Link router
+    - tplinkwifi.net
+      # Windows
+    - “+.msftconnecttest.com”
+    - “+.msftncsi.com”
+    - "dns.msftncsi.com"
+    - "www.msftncsi.com"
+    - "www.msftconnecttest.com"
+      # 中興路由器
+    - zte.home
+      # Stun Services
+    - "+.stun.*.*"
+    - "+.stun.*.*.*"
+    - "+.stun.*.*.*.*"
+    - "+.stun.*.*.*.*.*"
+      # Google Voices
+    - "lens.l.google.com"
+      # Nintendo Switch
+    - "+.srv.nintendo.net"
+      # PlayStation
+    - "+.stun.playstation.net"
+      # XBox
+    - "xbox.*.*.microsoft.com"
+    - "+.xboxlive.com"
+      # Bilibili CDN
+    - "+.mcdn.bilivideo.cn"
+    - "*bili*"
+proxies:
+  - name: "bart"
+    type: vless
+    server: 156.251.130.60
+    port: 20084
+    uuid: 0d96e97a-6ffa-459f-9b51-fd963dfcfba6
+    network: tcp
+    tls: true
+    flow: xtls-rprx-vision
+    servername: "www.lovelive-anime.jp"
+    reality-opts:
+      public-key: O5q0G2vl3rwjXfOK_2yfQeqpjUejaoLwwoaFxEOjPmU
+    client-fingerprint: chrome
+  - name: "bart_vision"
+    type: vless
+    server: bart.howiesyu.link
+    port: 443
+    uuid: 0d96e97a-6ffa-459f-9b51-fd963dfcfba6
+    network: tcp
+    tls: true
+    flow: xtls-rprx-vision
+    client-fingerprint: chrome
+  - name: "bart_gRPC"
+    type: vless
+    server: 156.251.130.60
+    port: 20084
+    uuid: 0d96e97a-6ffa-459f-9b51-fd963dfcfba6
+    network: grpc
+    tls: true
+    servername: "www.lovelive-anime.jp"
+    grpc-opts:
+      grpc-service-name: "grpc"
+    reality-opts:
+      public-key: O5q0G2vl3rwjXfOK_2yfQeqpjUejaoLwwoaFxEOjPmU
+    client-fingerprint: chrome
+  # - name: "vmiss-jp"
+  #   type: vless
+  #   server: 38.47.109.238
+  #   port: 26219
+  #   uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
+  #   network: tcp
+  #   tls: true
+  #   udp: true
+  #   flow: xtls-rprx-vision
+  #   servername: vmjp.howiesyu.link
+  #   reality-opts:
+  #     public-key: Aa3NxXxliBETLyrR4-Jph0PyilCjrtkgn1iXnH27mFk
+  #    # short-id: 6ba85179e30d4fc2
+  #   client-fingerprint: chrome # cannot be empty
+  # - name: "vmiss-jp_vision"
+  #   type: vless
+  #   server: vmjp.howiesyu.link
+  #   port: 15477
+  #   uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
+  #   network: tcp
+  #   tls: true
+  #   udp: false
+  #   xudp: false
+  #   flow: xtls-rprx-vision
+  #   client-fingerprint: chrome
+  # - name: "vmiss-jp_gRPC"
+  #   type: vless
+  #   server: 38.47.109.238
+  #   port: 26219
+  #   uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
+  #   network: grpc
+  #   tls: true
+  #   servername: vmjp.howiesyu.link
+  #   grpc-opts:
+  #     grpc-service-name: "grpc"
+  #   reality-opts:
+  #     public-key: Aa3NxXxliBETLyrR4-Jph0PyilCjrtkgn1iXnH27mFk
+  #     short-id: 6ba85179e30d4fc2
+  #   client-fingerprint: chrome
+  - name: "bww"
+    type: vless
+    server: 212.50.254.87
+    port: 15326
+    uuid: da3d3cbf-e0cd-45af-aa63-c2d552c84915
+    network: tcp
+    tls: true
+    udp: true
+    flow: xtls-rprx-vision
+    servername: itunes.apple.com
+    reality-opts:
+      public-key: Ozjp-cGsogubHLomaTthbOpNu3YyLe1yLOV7t5xNGwM
+     # short-id: 6ba85179e30d4fc2
+    client-fingerprint: chrome # cannot be empty
+  - name: "bww_vision"
+    type: vless
+    server: bww.howiesyu.link
+    port: 443
+    uuid: da3d3cbf-e0cd-45af-aa63-c2d552c84915
+    network: tcp
+    tls: true
+    udp: true
+    flow: xtls-rprx-vision
+    client-fingerprint: chrome
+  - name: "bww_gRPC"
+    type: vless
+    server: 212.50.254.87
+    port: 15326
+    uuid: da3d3cbf-e0cd-45af-aa63-c2d552c84915
+    network: grpc
+    tls: true
+    servername: itunes.apple.com
+    grpc-opts:
+      grpc-service-name: "grpc"
+    reality-opts:
+      public-key: Ozjp-cGsogubHLomaTthbOpNu3YyLe1yLOV7t5xNGwM
+      short-id: 6ba85179e30d4fc2
+    client-fingerprint: chrome
+
+rule-providers:
+  gemini:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./ruleset/gemini.yaml
+    url: "https://github.com/blackmatrix7/ios_rule_script/raw/master/rule/Clash/Gemini/Gemini.yaml"
+    interval: 600
+  ChatGPT:
+    type: http
+    behavior: classical
+    url: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/G4free/clash-ruleset/main/ruleset/ChatGPT.yaml"
+    path: ./ruleset/ChatGPT.yaml
+    interval: 86400
+  scholar:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./ruleset/scholar.yaml
+    url: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/dler-io/Rules/main/Clash/Provider/Scholar.yaml"
+    interval: 86400
+  Copilot:
+    type: http
+    behavior: classical
+    url: "https://github.com/blackmatrix7/ios_rule_script/raw/master/rule/Clash/Copilot/Copilot.yaml"
+    path: ./ruleset/Copilot.yaml
+    interval: 86400
+
+rules:
+  ############################# 自定义 #############################
+  - RULE-SET,Copilot,bart_gRPC
+  - GEOSITE,category-ads-all,REJECT
+  ############################# Adobe activation ##################
+  - GEOSITE,adobe-activation,REJECT
+  - DOMAIN-SUFFIX,ic.adobe.io,REJECT
+  - DOMAIN-SUFFIX,7sj9n87sls.adobe.io,REJECT
+  - DOMAIN-SUFFIX,ij0gdyrfka.adobe.io,REJECT
+  - DOMAIN-SUFFIX,lm.licenses.adobe.com,REJECT
+  - DOMAIN-SUFFIX,na2m-pr.licenses.adobe.com,REJECT
+  - DOMAIN-SUFFIX,practivate.adobe.com,REJECT
+  - DOMAIN-SUFFIX,activate.adobe.com,REJECT
+  - DOMAIN-SUFFIX,ereg.adobe.com,REJECT
+  - DOMAIN-SUFFIX,wip.adobe.com,REJECT
+  - DOMAIN-SUFFIX,lmlicenses.wip4.adobe.com,REJECT
+  - DOMAIN-SUFFIX,na1r.services.adobe.com,REJECT
+  - DOMAIN-SUFFIX,hlrcv.stage.adobe.com,REJECT
+  - DOMAIN-SUFFIX,genuine.adobe.com,REJECT
+  - DOMAIN-SUFFIX,prod.adobegenuine.com,REJECT
+  - DOMAIN-SUFFIX,cc-api-data.adobe.io,REJECT
+  # - DOMAIN-SUFFIX,ims-prod06.adobelogin.com,REJECT
+  - DOMAIN-SUFFIX,p13n.adobe.io,REJECT
+  - DOMAIN-SUFFIX,crs.cr.adobe.com,REJECT
+  - DOMAIN-SUFFIX,lcs-cops.adobe.io,REJECT
+  # - DOMAIN-SUFFIX,hbrt.adobe.com,REJECT
+  - DOMAIN-SUFFIX,23ynjitwt5.adobe.io,REJECT
+  - DOMAIN-SUFFIX,butler.adobe.com,REJECT
+  - DOMAIN-SUFFIX,acp-ss-va6c2.adobe.io,REJECT
+  - AND,((PROCESS-NAME,Illustrator.exe),(DOMAIN-SUFFIX,adobe.io)),REJECT
+ ############################# End Adobe activation ##################
+  - SUB-RULE,(SRC-PORT,10801),sub-browser
+  - DOMAIN-SUFFIX,researchgate.net,auto_all
+  - RULE-SET,Copilot,bart_gRPC
+  # - RULE-SET,scholar,DIRECT
+  - RULE-SET,gemini,bart_all
+  - RULE-SET,ChatGPT,bart_gRPC
+  - DOMAIN-KEYWORD,18comic,bart_all
+  - DOMAIN-SUFFIX,kox.moe,vision_only
+  - DOMAIN-SUFFIX,remaker.ai,auto_all
+  - GEOSITE,openai,bww_gRPC
+  - DOMAIN-SUFFIX,coze.com,bart_all
+  - GEOSITE,paypal,bart_all
+  - GEOSITE,category-games@cn,DIRECT
+  - GEOSITE,category-entertainment,auto_all
+  - GEOSITE,google,auto_xray_only
+  - GEOIP,github,vision_only
+  - GEOSITE,github,vision_only
+  - PROCESS-NAME,Obsidian.exe,vision_only
+  - DOMAIN-KEYWORD,carbon,auto_xray_only
+  - DOMAIN-SUFFIX,usegalaxy.org,DIRECT
+  - DOMAIN-SUFFIX,misakaf.org,auto_all
+  - GEOSITE,spotify,bart_all
+  - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
+  - DOMAIN-SUFFIX,sourceforge.net,auto_xray_only
+  - GEOSITE,cn,DIRECT
+  - DOMAIN-SUFFIX,guwendao.net,DIRECT
+  - DOMAIN-SUFFIX,open-accessa.xyz,DIRECT
+  - DOMAIN,clash.razord.top,DIRECT
+  - DOMAIN,yacd.haishan.me,DIRECT
+  - DOMAIN-KEYWORD,spcnwiki,DIRECT
+  # - DOMAIN,sg.imedicaldoctor.net,REJECT
+  - DOMAIN-SUFFIX,spcnwikia.top,DIRECT
+  - GEOSITE,private,DIRECT
+  - GEOSITE,apple-cn,DIRECT
+  - GEOSITE,google-cn,DIRECT
+  - GEOSITE,tld-cn,DIRECT
+  - GEOSITE,geolocation-!cn,auto_all
+  - GEOIP,cn,DIRECT,no-resolve
+  - GEOIP,private,DIRECT,no-resolve
+  - IP-CIDR,156.251.130.60/32,DIRECT,no-resolve
+  - IP-CIDR,45.93.28.208/32,DIRECT,no-resolve
+  - IP-CIDR,223.5.5.5/32,DIRECT,no-resolve
+  - IP-CIDR,119.29.29.29/32,DIRECT,no-resolve
+  - IP-CIDR,180.76.76.76/32,DIRECT,no-resolve
+  ##################################################################
+  - GEOIP,us,auto_all,no-resolve
+  - GEOIP,ca,auto_all,no-resolve
+  - GEOIP,telegram,auto_all,no-resolve
+  - GEOIP,LAN,DIRECT,no-resolve
+  - MATCH,auto_all
+sub-rules:
+  sub-browser:
+    - GEOSITE,paypal,bart_all
+    - GEOSITE,openai,bww_gRPC
+    - GEOSITE,github,vision_only
+    - GEOSITE,category-entertainment,auto_all
+    - DOMAIN-SUFFIX,kox.moe,vision_only
+    - MATCH,auto_all
