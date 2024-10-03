@@ -321,7 +321,8 @@ rule-providers:
 
 rules:
   ############################# 自定义 #############################
-  - RULE-SET,Copilot,bart_gRPC
+  - RULE-SET,ChatGPT,bart_gRPC
+  - RULE-SET,Copilot,bww_gRPC
   - GEOSITE,category-ads-all,REJECT
   ############################# Adobe activation ##################
   - GEOSITE,adobe-activation,REJECT
@@ -352,10 +353,8 @@ rules:
  ############################# End Adobe activation ##################
   - SUB-RULE,(SRC-PORT,10801),sub-browser
   - DOMAIN-SUFFIX,researchgate.net,auto_all
-  - RULE-SET,Copilot,bart_gRPC
   # - RULE-SET,scholar,DIRECT
   - RULE-SET,gemini,bart_all
-  - RULE-SET,ChatGPT,bart_gRPC
   - DOMAIN-KEYWORD,18comic,bart_all
   - DOMAIN-SUFFIX,kox.moe,vision_only
   - DOMAIN-SUFFIX,remaker.ai,auto_all
