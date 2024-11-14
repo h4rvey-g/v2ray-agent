@@ -213,64 +213,25 @@ proxies:
     reality-opts:
       public-key: O5q0G2vl3rwjXfOK_2yfQeqpjUejaoLwwoaFxEOjPmU
     client-fingerprint: chrome
-  # - name: "vmiss-jp"
-  #   type: vless
-  #   server: 38.47.109.238
-  #   port: 26219
-  #   uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
-  #   network: tcp
-  #   tls: true
-  #   udp: true
-  #   flow: xtls-rprx-vision
-  #   servername: vmjp.howiesyu.link
-  #   reality-opts:
-  #     public-key: Aa3NxXxliBETLyrR4-Jph0PyilCjrtkgn1iXnH27mFk
-  #    # short-id: 6ba85179e30d4fc2
-  #   client-fingerprint: chrome # cannot be empty
-  # - name: "vmiss-jp_vision"
-  #   type: vless
-  #   server: vmjp.howiesyu.link
-  #   port: 15477
-  #   uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
-  #   network: tcp
-  #   tls: true
-  #   udp: false
-  #   xudp: false
-  #   flow: xtls-rprx-vision
-  #   client-fingerprint: chrome
-  # - name: "vmiss-jp_gRPC"
-  #   type: vless
-  #   server: 38.47.109.238
-  #   port: 26219
-  #   uuid: 022f2d4f-64ad-4d37-bb4e-30ee48e421a4
-  #   network: grpc
-  #   tls: true
-  #   servername: vmjp.howiesyu.link
-  #   grpc-opts:
-  #     grpc-service-name: "grpc"
-  #   reality-opts:
-  #     public-key: Aa3NxXxliBETLyrR4-Jph0PyilCjrtkgn1iXnH27mFk
-  #     short-id: 6ba85179e30d4fc2
-  #   client-fingerprint: chrome
   - name: "bww"
     type: vless
     server: 212.50.254.87
-    port: 15326
-    uuid: da3d3cbf-e0cd-45af-aa63-c2d552c84915
+    port: 12565
+    uuid: edcfc4f6-8683-449f-b405-1750ad252071
     network: tcp
     tls: true
     udp: true
     flow: xtls-rprx-vision
-    servername: itunes.apple.com
+    servername: m.media-amazon.com
     reality-opts:
-      public-key: Ozjp-cGsogubHLomaTthbOpNu3YyLe1yLOV7t5xNGwM
+      public-key: 15-Oyi8XIlpeP8zyWrtS7N9dI6FSSy7VuHuongCCpH4
      # short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome # cannot be empty
   - name: "bww_vision"
     type: vless
     server: bww.howiesyu.link
-    port: 443
-    uuid: da3d3cbf-e0cd-45af-aa63-c2d552c84915
+    port: 12565
+    uuid: edcfc4f6-8683-449f-b405-1750ad252071
     network: tcp
     tls: true
     udp: true
@@ -279,17 +240,22 @@ proxies:
   - name: "bww_gRPC"
     type: vless
     server: 212.50.254.87
-    port: 15326
-    uuid: da3d3cbf-e0cd-45af-aa63-c2d552c84915
+    port: 12565
+    uuid: edcfc4f6-8683-449f-b405-1750ad252071
     network: grpc
     tls: true
-    servername: itunes.apple.com
+    servername: m.media-amazon.com
     grpc-opts:
       grpc-service-name: "grpc"
     reality-opts:
-      public-key: Ozjp-cGsogubHLomaTthbOpNu3YyLe1yLOV7t5xNGwM
-      short-id: 6ba85179e30d4fc2
+      public-key: 15-Oyi8XIlpeP8zyWrtS7N9dI6FSSy7VuHuongCCpH4
+    #  short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome
+  - name: XJTU_vpn
+    type: socks5
+    server: 127.0.0.1
+    port: 23333
+
 
 rule-providers:
   gemini:
@@ -321,8 +287,9 @@ rule-providers:
 
 rules:
   ############################# 自定义 #############################
-  - RULE-SET,ChatGPT,bart_gRPC
+  - GEOSITE,openai,bww_gRPC
   - RULE-SET,Copilot,bww_gRPC
+  - DOMAIN-SUFFIX,umami.is,auto_all
   - GEOSITE,category-ads-all,REJECT
   ############################# Adobe activation ##################
   - GEOSITE,adobe-activation,REJECT
@@ -352,9 +319,10 @@ rules:
   - AND,((PROCESS-NAME,Illustrator.exe),(DOMAIN-SUFFIX,adobe.io)),REJECT
  ############################# End Adobe activation ##################
   - SUB-RULE,(SRC-PORT,10801),sub-browser
+#  - RULE-SET,scholar,XJTU_vpn,no-resolve
   - DOMAIN-SUFFIX,researchgate.net,auto_all
-  # - RULE-SET,scholar,DIRECT
-  - RULE-SET,gemini,bart_all
+  - DOMAIN,challenges.cloudflare.com,auto_all
+  - RULE-SET,gemini,auto_all
   - DOMAIN-KEYWORD,18comic,bart_all
   - DOMAIN-SUFFIX,kox.moe,vision_only
   - DOMAIN-SUFFIX,remaker.ai,auto_all
@@ -387,6 +355,7 @@ rules:
   - GEOSITE,tld-cn,DIRECT
   - GEOSITE,geolocation-!cn,auto_all
   - GEOIP,cn,DIRECT,no-resolve
+#  - IP-CIDR,10.181.6.195/32,XJTU_vpn,no-resolve
   - GEOIP,private,DIRECT,no-resolve
   - IP-CIDR,156.251.130.60/32,DIRECT,no-resolve
   - IP-CIDR,45.93.28.208/32,DIRECT,no-resolve
