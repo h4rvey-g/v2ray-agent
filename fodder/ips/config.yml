@@ -3,6 +3,7 @@ allow-lan: true
 mode: rule
 log-level: debug
 external-controller: :9090
+geodata-mode: true
 geox-url:
   geoip: "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
   geosite: "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat"
@@ -220,7 +221,7 @@ proxies:
     uuid: edcfc4f6-8683-449f-b405-1750ad252071
     network: tcp
     tls: true
-    udp: true
+#    udp: true
     flow: xtls-rprx-vision
     servername: m.media-amazon.com
     reality-opts:
@@ -287,8 +288,8 @@ rule-providers:
 
 rules:
   ############################# 自定义 #############################
-  - GEOSITE,openai,bww_gRPC
-  - RULE-SET,Copilot,bww_gRPC
+  - GEOSITE,openai,auto_all
+  - RULE-SET,Copilot,auto_all
   - DOMAIN-SUFFIX,umami.is,auto_all
   - GEOSITE,category-ads-all,REJECT
   ############################# Adobe activation ##################
@@ -332,7 +333,7 @@ rules:
   - GEOSITE,category-games@cn,DIRECT
   - GEOSITE,category-entertainment,auto_all
   - GEOSITE,google,auto_xray_only
-  - GEOIP,github,vision_only
+#   - GEOIP,github,vision_only
   - GEOSITE,github,vision_only
   - PROCESS-NAME,Obsidian.exe,vision_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
