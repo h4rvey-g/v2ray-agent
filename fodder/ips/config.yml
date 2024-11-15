@@ -5,8 +5,8 @@ log-level: debug
 external-controller: :9090
 geodata-mode: true
 geox-url:
-  geoip: "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
-  geosite: "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat"
+  geoip: "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat"
+  geosite: "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat"
 global-client-fingerprint: chrome
 # interface-name: WLAN
 ipv6: false
@@ -97,7 +97,7 @@ dns:
   nameserver-policy:
    'spcnwikia.top': 'https://dns.alidns.com/dns-query'
    '+.xjtu.edu.cn': 'https://dns.alidns.com/dns-query'
-   'geosite:china-list': ['https://dns.alidns.com/dns-query','https://doh.pub/dns-query']
+   'geosite:cn': ['https://dns.alidns.com/dns-query','https://doh.pub/dns-query']
    '+.howiesyu.link': '223.5.5.5'
    '+.closeai.biz': 'https://deans.howiesyu.link'
    '+.fakeopenai.cn': 'https://deans.howiesyu.link'
@@ -236,6 +236,7 @@ proxies:
     network: tcp
     tls: true
     udp: true
+    skip-cert-verify: true
     flow: xtls-rprx-vision
     client-fingerprint: chrome
   - name: "bww_gRPC"
