@@ -292,7 +292,12 @@ rules:
   - GEOSITE,openai,auto_all
   - RULE-SET,Copilot,auto_all
   - DOMAIN-SUFFIX,umami.is,auto_all
+  - GEOSITE,anthropic,auto_all
+  - DOMAIN-SUFFIX,claude.ai,auto_all
+  - DOMAIN-SUFFIX,anthropic.com,auto_all
+  - DOMAIN-SUFFIX,learning.google.com,bart_all
   - GEOSITE,category-ads-all,REJECT
+  - DOMAIN-SUFFIX,imetyou.top,DIRECT
   ############################# Adobe activation ##################
   - GEOSITE,adobe-activation,REJECT
   - DOMAIN-SUFFIX,ic.adobe.io,REJECT
