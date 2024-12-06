@@ -1,7 +1,7 @@
 mixed-port: 10801
 allow-lan: true
 mode: rule
-log-level: debug
+log-level: info
 external-controller: :9090
 geodata-mode: true
 geox-url:
@@ -13,14 +13,14 @@ ipv6: false
 
 tun:
   enable: true
-  device: meta              #MacOS建议删除此项
-  stack: system             #system / gvisor / lwip liwp仅为1.13.2以上的功能
+  device: meta #MacOS建议删除此项
+  stack: system #system / gvisor / lwip liwp仅为1.13.2以上的功能
   dns-hijack:
     - any:53
     - tcp://any:53
   auto-route: true
   auto-detect-interface: false
-  include-interface: 
+  include-interface:
     - WLAN
     - WLAN 2
   # mtu: 9000               #最大传输单元
@@ -89,50 +89,52 @@ dns:
   prefer-h3: true
   listen: 0.0.0.0:1053
   enhanced-mode: fake-ip # 模式：redir-host或fake-ip
-  # use-hosts: true 
+  # use-hosts: true
   fake-ip-range: 198.18.0.1/16
-  default-nameserver: 
+  default-nameserver:
     - 8.8.8.8
     - 1.1.1.1
   nameserver-policy:
-   'spcnwikia.top': 'https://dns.alidns.com/dns-query'
-   '+.xjtu.edu.cn': 'https://dns.alidns.com/dns-query'
-   'geosite:cn': ['https://dns.alidns.com/dns-query','https://doh.pub/dns-query']
-   '+.howiesyu.link': '223.5.5.5'
-   '+.closeai.biz': 'https://deans.howiesyu.link'
-   '+.fakeopenai.cn': 'https://deans.howiesyu.link'
-   '+.acadwrite.cn': 'https://deans.howiesyu.link'
-   'geosite:github' : 'https://deans.howiesyu.link'
-   'detectportal.firefox.com' : 'https://deans.howiesyu.link'
-   'geosite:openai': 'https://deans.howiesyu.link'
-   'geosite:bing': 'https://deans.howiesyu.link'
-   'bingapis.com': 'https://deans.howiesyu.link'
-   '+.bing.com': 'https://deans.howiesyu.link'
-   'geosite:gfw': 'https://deans.howiesyu.link'
+    "spcnwikia.top": "https://dns.alidns.com/dns-query"
+    "+.xjtu.edu.cn": "https://dns.alidns.com/dns-query"
+    "geosite:cn":
+      ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"]
+    "+.howiesyu.link": "223.5.5.5"
+    "+.closeai.biz": "https://deans.howiesyu.link"
+    "+.fakeopenai.cn": "https://deans.howiesyu.link"
+    "+.acadwrite.cn": "https://deans.howiesyu.link"
+    "geosite:github": "https://deans.howiesyu.link"
+    "detectportal.firefox.com": "https://deans.howiesyu.link"
+    "geosite:openai": "https://deans.howiesyu.link"
+    "geosite:bing": "https://deans.howiesyu.link"
+    "bingapis.com": "https://deans.howiesyu.link"
+    "+.bing.com": "https://deans.howiesyu.link"
+    "geosite:gfw": "https://deans.howiesyu.link"
+    "claude.ai": "https://deans.howiesyu.link"
   #  '+.internal.crop.com': '10.0.0.1'
   #  'geosite:cn': https://doh.pub/dns-query
   #  'geosite:geolocation-!cn': [tls://8.8.4.4, https://1.0.0.1/dns-query]
   #  "www.baidu.com,+.google.cn": [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
   #  "geosite:private,apple": [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
   nameserver:
-   - https://doh.pub/dns-query
-   - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
   fallback:
-   - https://1.1.1.1/dns-query
-   - https://deans.howiesyu.link/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
-   - https://max.rethinkdns.com/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
-   - https://sky.rethinkdns.com/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
-   - 8.8.8.8
-   - 1.1.1.1
+    - https://1.1.1.1/dns-query
+    - https://deans.howiesyu.link/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
+    - https://max.rethinkdns.com/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
+    - https://sky.rethinkdns.com/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
+    - 8.8.8.8
+    - 1.1.1.1
   fallback-filter:
     geoip: true
     geoip-code: CN
     ipcidr:
       - 240.0.0.0/4
     domain:
-      - '+.google.com'
-      - '+.facebook.com'
-      - '+.youtube.com'
+      - "+.google.com"
+      - "+.facebook.com"
+      - "+.youtube.com"
   # 配置不使用 fake-ip 的域名
   fake-ip-filter:
     - "*.lan"
@@ -187,6 +189,7 @@ proxies:
     uuid: 0d96e97a-6ffa-459f-9b51-fd963dfcfba6
     network: tcp
     tls: true
+    udp: true
     flow: xtls-rprx-vision
     servername: "www.lovelive-anime.jp"
     reality-opts:
@@ -198,6 +201,7 @@ proxies:
     port: 443
     uuid: 0d96e97a-6ffa-459f-9b51-fd963dfcfba6
     network: tcp
+    udp: true
     tls: true
     flow: xtls-rprx-vision
     client-fingerprint: chrome
@@ -221,12 +225,12 @@ proxies:
     uuid: edcfc4f6-8683-449f-b405-1750ad252071
     network: tcp
     tls: true
-#    udp: true
+    udp: true
     flow: xtls-rprx-vision
     servername: m.media-amazon.com
     reality-opts:
       public-key: 15-Oyi8XIlpeP8zyWrtS7N9dI6FSSy7VuHuongCCpH4
-     # short-id: 6ba85179e30d4fc2
+      # short-id: 6ba85179e30d4fc2
     client-fingerprint: chrome # cannot be empty
   - name: "bww_vision"
     type: vless
@@ -246,6 +250,7 @@ proxies:
     uuid: edcfc4f6-8683-449f-b405-1750ad252071
     network: grpc
     tls: true
+    udp: true
     servername: m.media-amazon.com
     grpc-opts:
       grpc-service-name: "grpc"
@@ -257,7 +262,6 @@ proxies:
     type: socks5
     server: 127.0.0.1
     port: 23333
-
 
 rule-providers:
   gemini:
@@ -324,11 +328,12 @@ rules:
   - DOMAIN-SUFFIX,butler.adobe.com,REJECT
   - DOMAIN-SUFFIX,acp-ss-va6c2.adobe.io,REJECT
   - AND,((PROCESS-NAME,Illustrator.exe),(DOMAIN-SUFFIX,adobe.io)),REJECT
- ############################# End Adobe activation ##################
+  ############################# End Adobe activation ##################
   - SUB-RULE,(SRC-PORT,10801),sub-browser
-#  - RULE-SET,scholar,XJTU_vpn,no-resolve
+  #  - RULE-SET,scholar,XJTU_vpn,no-resolve
   - DOMAIN-SUFFIX,researchgate.net,auto_all
   - DOMAIN,challenges.cloudflare.com,auto_all
+  - DOMAIN-SUFFIX,sourcepower.top,auto_all
   - RULE-SET,gemini,auto_all
   - DOMAIN-KEYWORD,18comic,bart_all
   - DOMAIN-SUFFIX,kox.moe,vision_only
@@ -339,7 +344,7 @@ rules:
   - GEOSITE,category-games@cn,DIRECT
   - GEOSITE,category-entertainment,auto_all
   - GEOSITE,google,auto_xray_only
-#   - GEOIP,github,vision_only
+  #   - GEOIP,github,vision_only
   - GEOSITE,github,vision_only
   - PROCESS-NAME,Obsidian.exe,vision_only
   - DOMAIN-KEYWORD,carbon,auto_xray_only
@@ -362,7 +367,7 @@ rules:
   - GEOSITE,tld-cn,DIRECT
   - GEOSITE,geolocation-!cn,auto_all
   - GEOIP,cn,DIRECT,no-resolve
-#  - IP-CIDR,10.181.6.195/32,XJTU_vpn,no-resolve
+  #  - IP-CIDR,10.181.6.195/32,XJTU_vpn,no-resolve
   - GEOIP,private,DIRECT,no-resolve
   - IP-CIDR,156.251.130.60/32,DIRECT,no-resolve
   - IP-CIDR,45.93.28.208/32,DIRECT,no-resolve
