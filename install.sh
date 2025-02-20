@@ -201,7 +201,8 @@ initVar() {
     # xray-core reality serverName publicKey
     xrayVLESSRealityServerName=
     xrayVLESSRealityPort=
-    xrayVLESSSplitHTTPort=
+    xrayVLESSRealityXHTTPServerName=
+    xrayVLESSRealityXHTTPort=
     #    xrayVLESSRealityPublicKey=
 
     #    interfaceName=
@@ -415,6 +416,12 @@ readInstallProtocolType() {
     xrayVLESSRealityPort=
     xrayVLESSRealityServerName=
 
+    xrayVLESSRealityXHTTPort=
+    xrayVLESSRealityXHTTPServerName=
+
+    #    currentRealityXHTTPPrivateKey=
+    currentRealityXHTTPPublicKey=
+
     currentRealityPrivateKey=
     currentRealityPublicKey=
 
@@ -447,9 +454,15 @@ readInstallProtocolType() {
                 singBoxVLESSWSPort=$(jq .inbounds[0].listen_port "${row}.json")
             fi
         fi
-        if echo "${row}" | grep -q VLESS_SplitHTTP_inbounds; then
+        if echo "${row}" | grep -q VLESS_XHTTP_inbounds; then
             currentInstallProtocolType="${currentInstallProtocolType}12,"
-            xrayVLESSSplitHTTPort=$(jq -r .inbounds[0].port "${row}.json")
+            xrayVLESSRealityXHTTPort=$(jq -r .inbounds[0].port "${row}.json")
+
+            xrayVLESSRealityXHTTPServerName=$(jq -r .inbounds[0].streamSettings.realitySettings.serverNames[0] "${row}.json")
+
+            currentRealityXHTTPPublicKey=$(jq -r .inbounds[0].streamSettings.realitySettings.publicKey "${row}.json")
+            #            currentRealityXHTTPPrivateKey=$(jq -r .inbounds[0].streamSettings.realitySettings.privateKey "${row}.json")
+
             #            if [[ "${coreInstallType}" == "2" ]]; then
             #                frontingType=03_VLESS_WS_inbounds
             #                singBoxVLESSWSPort=$(jq .inbounds[0].listen_port "${row}.json")
@@ -489,8 +502,12 @@ readInstallProtocolType() {
                 xrayVLESSRealityServerName=$(jq -r .inbounds[0].streamSettings.realitySettings.serverNames[0] "${row}.json")
                 realityServerName=${xrayVLESSRealityServerName}
                 xrayVLESSRealityPort=$(jq -r .inbounds[0].port "${row}.json")
+
+                realityDomainPort=$(jq -r .inbounds[0].streamSettings.realitySettings.dest "${row}.json" | awk -F '[:]' '{print $2}')
+
                 currentRealityPublicKey=$(jq -r .inbounds[0].streamSettings.realitySettings.publicKey "${row}.json")
                 currentRealityPrivateKey=$(jq -r .inbounds[0].streamSettings.realitySettings.privateKey "${row}.json")
+                frontingTypeReality=07_VLESS_vision_reality_inbounds
 
             elif [[ "${coreInstallType}" == "2" ]]; then
                 frontingTypeReality=07_VLESS_vision_reality_inbounds
@@ -884,8 +901,8 @@ readConfigHostPathUUID() {
                     fi
                 fi
             fi
-            if [[ -z "${currentPath}" && -f "${configPath}12_VLESS_SplitHTTP_inbounds.json" ]]; then
-                currentPath=$(jq -r .inbounds[0].streamSettings.splithttpSettings.path "${configPath}12_VLESS_SplitHTTP_inbounds.json" | awk -F "[s][p][l][i][t]" '{print $1}' | awk -F "[/]" '{print $2}')
+            if [[ -z "${currentPath}" && -f "${configPath}12_VLESS_XHTTP_inbounds.json" ]]; then
+                currentPath=$(jq -r .inbounds[0].streamSettings.xhttpSettings.path "${configPath}12_VLESS_XHTTP_inbounds.json" | awk -F "[x][H][T][T][P]" '{print $1}' | awk -F "[/]" '{print $2}')
             fi
         elif [[ "${coreInstallType}" == "2" && -f "${singBoxConfigPath}05_VMess_WS_inbounds.json" ]]; then
             singBoxVMessWSPath=$(jq -r .inbounds[0].transport.path "${singBoxConfigPath}05_VMess_WS_inbounds.json")
@@ -1118,10 +1135,12 @@ installTools() {
 
     if ! find /usr/bin /usr/sbin | grep -q -w dig; then
         echoContent green " ---> 安装dig"
-        if echo "${installType}" | grep -q -w "apt"; then
+        if echo "${installType}" | grep -qw "apt"; then
             ${installType} dnsutils >/dev/null 2>&1
-        elif echo "${installType}" | grep -qwE "yum|apk"; then
+        elif echo "${installType}" | grep -qw "yum"; then
             ${installType} bind-utils >/dev/null 2>&1
+        elif echo "${installType}" | grep -qw "apk"; then
+            ${installType} bind-tools >/dev/null 2>&1
         fi
     fi
 
@@ -1181,8 +1200,7 @@ installTools() {
                 echoContent red "  1.获取Github文件失败，请等待Github恢复后尝试，恢复进度可查看 [https://www.githubstatus.com/]"
                 echoContent red "  2.acme.sh脚本出现bug，可查看[https://github.com/acmesh-official/acme.sh] issues"
                 echoContent red "  3.如纯IPv6机器，请设置NAT64,可执行下方命令，如果添加下方命令还是不可用，请尝试更换其他NAT64"
-                #                echoContent skyBlue "  echo -e \"nameserver 2001:67c:2b0::4\\\nnameserver 2a00:1098:2c::1\" >> /etc/resolv.conf"
-                echoContent skyBlue "  sed -i \"1i\\\nameserver 2001:67c:2b0::4\\\nnameserver 2a00:1098:2c::1\" /etc/resolv.conf"
+                echoContent skyBlue "  sed -i \"1i\\\nameserver 2a00:1098:2b::1\\\nnameserver 2a00:1098:2c::1\\\nnameserver 2a01:4f8:c2c:123f::1\\\nnameserver 2a01:4f9:c010:3f02::1\" /etc/resolv.conf"
                 exit 0
             fi
         fi
@@ -2121,7 +2139,8 @@ handleNginx() {
             systemctl stop nginx
         fi
         sleep 0.5
-        if [[ -n $(pgrep -f "nginx") ]]; then
+
+        if [[ -z ${btDomain} && -n $(pgrep -f "nginx") ]]; then
             pgrep -f "nginx" | xargs kill -9
         fi
         echoContent green " ---> Nginx关闭成功"
@@ -2693,7 +2712,7 @@ AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 ExecStart=/etc/v2ray-agent/hysteria/hysteria server -c /etc/v2ray-agent/hysteria/conf/config.json --log-level debug
 Restart=on-failure
 RestartSec=10
-LimitNPROC=10000
+LimitNPROC=infinity
 LimitNOFILE=infinity
 
 [Install]
@@ -2708,32 +2727,28 @@ EOF
 # 安装alpine开机启动
 installAlpineStartup() {
     local serviceName=$1
-    local startCommand=$2
+    if [[ "${serviceName}" == "sing-box" ]]; then
+        cat <<EOF >"/etc/init.d/${serviceName}"
+#!/sbin/openrc-run
 
-    cat <<EOF >"/etc/init.d/${serviceName}"
-#!/bin/sh
-
-case "\$1" in
-  start)
-    echo "Starting ${serviceName}"
-    ${startCommand} >/dev/null 2>&1 &
-    ;;
-  stop)
-    echo "Stopping ${serviceName}"
-    pgrep -f ${serviceName}|xargs kill -9 >/dev/null 2>&1
-    ;;
-  restart)
-    rc-service ${serviceName} stop
-    rc-service ${serviceName} start
-    ;;
-  *)
-    echo "Usage: rc-service ${serviceName} {start|stop|restart}"
-    exit 1
-    ;;
-esac
-
-exit 0
+description="sing-box service"
+command="/etc/v2ray-agent/sing-box/sing-box"
+command_args="run -c /etc/v2ray-agent/sing-box/conf/config.json"
+command_background=true
+pidfile="/var/run/sing-box.pid"
 EOF
+    elif [[ "${serviceName}" == "xray" ]]; then
+        cat <<EOF >"/etc/init.d/${serviceName}"
+#!/sbin/openrc-run
+
+description="xray service"
+command="/etc/v2ray-agent/xray/xray"
+command_args="run -confdir /etc/v2ray-agent/xray/conf"
+command_background=true
+pidfile="/var/run/xray.pid"
+EOF
+    fi
+
     chmod +x "/etc/init.d/${serviceName}"
 }
 
@@ -2747,6 +2762,8 @@ installSingBoxService() {
         touch /etc/systemd/system/sing-box.service
         cat <<EOF >/etc/systemd/system/sing-box.service
 [Unit]
+Description=Sing-Box Service
+Documentation=https://sing-box.sagernet.org
 After=network.target nss-lookup.target
 
 [Service]
@@ -2758,7 +2775,7 @@ ExecStart=${execStart}
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 RestartSec=10
-LimitNPROC=512
+LimitNPROC=infinity
 LimitNOFILE=infinity
 
 [Install]
@@ -2766,7 +2783,7 @@ WantedBy=multi-user.target
 EOF
         bootStartup "sing-box.service"
     elif [[ "${release}" == "alpine" ]]; then
-        installAlpineStartup "sing-box" "${execStart}"
+        installAlpineStartup "sing-box"
         bootStartup "sing-box"
     fi
 
@@ -2790,7 +2807,7 @@ User=root
 ExecStart=${execStart}
 Restart=on-failure
 RestartPreventExitStatus=23
-LimitNPROC=10000
+LimitNPROC=infinity
 LimitNOFILE=infinity
 [Install]
 WantedBy=multi-user.target
@@ -2798,7 +2815,7 @@ EOF
         bootStartup "xray.service"
         echoContent green " ---> 配置Xray开机自启成功"
     elif [[ "${release}" == "alpine" ]]; then
-        installAlpineStartup "xray" "${execStart}"
+        installAlpineStartup "xray"
         bootStartup "xray"
     fi
 }
@@ -2976,9 +2993,9 @@ initXrayClients() {
             currentUser="{\"id\":\"${uuid}\",\"email\":\"${email}-VLESS_WS\"}"
             users=$(echo "${users}" | jq -r ". +=[${currentUser}]")
         fi
-        # VLESS SplitHTTP
+        # VLESS XHTTP
         if echo "${type}" | grep -q ",12,"; then
-            currentUser="{\"id\":\"${uuid}\",\"email\":\"${email}-VLESS_SplitHTTP\"}"
+            currentUser="{\"id\":\"${uuid}\",\"email\":\"${email}-VLESS_XHTTP\"}"
             users=$(echo "${users}" | jq -r ". +=[${currentUser}]")
         fi
         # trojan grpc
@@ -3414,7 +3431,7 @@ initTuicPort() {
 # 初始化tuic的协议
 initTuicProtocol() {
     if [[ -n "${tuicAlgorithm}" && -z "${lastInstallationConfig}" ]]; then
-        read -r -p "读取到上次使用的端口，是否使用 ？[y/n]:" historyTuicAlgorithm
+        read -r -p "读取到上次使用的算法，是否使用 ？[y/n]:" historyTuicAlgorithm
         if [[ "${historyTuicAlgorithm}" != "y" ]]; then
             tuicAlgorithm=
         else
@@ -3861,25 +3878,30 @@ removeSingBoxConfig() {
 }
 
 # 初始化wireguard出站信息
-addSingBoxWireGuardOut() {
-    readConfigWarpReg
-    cat <<EOF >"${singBoxConfigPath}wireguard_outbound.json"
-{
-     "outbounds": [
+addSingBoxWireGuardEndpoints() {
+    local type=$1
 
+    readConfigWarpReg
+
+    cat <<EOF >"${singBoxConfigPath}wireguard_endpoints_${type}.json"
+{
+     "endpoints": [
         {
             "type": "wireguard",
-            "tag": "wireguard_out",
-            "server": "162.159.192.1",
-            "server_port": 2408,
-            "local_address": [
-                "172.16.0.2/32",
-                "${addressWarpReg}/128"
+            "tag": "wireguard_endpoints_${type}",
+            "address": [
+                "${address}"
             ],
             "private_key": "${secretKeyWarpReg}",
-            "peer_public_key": "${publicKeyWarpReg}",
-            "reserved":${reservedWarpReg},
-            "mtu": 1280
+            "peers": [
+                {
+                  "address": "162.159.192.1",
+                  "port": 2408,
+                  "public_key": "${publicKeyWarpReg}",
+                  "reserved":${reservedWarpReg},
+                  "allowed_ips": ["0.0.0.0/0","::/0"]
+                }
+            ]
         }
     ]
 }
@@ -4222,41 +4244,45 @@ EOF
     elif [[ -z "$3" ]]; then
         rm /etc/v2ray-agent/xray/conf/03_VLESS_WS_inbounds.json >/dev/null 2>&1
     fi
-    # VLESS_SplitHTTP_TLS
+    # VLESS_XHTTP_TLS
     if echo "${selectCustomInstallType}" | grep -q ",12," || [[ "$1" == "all" ]]; then
-        initXraySplitPort
-        cat <<EOF >/etc/v2ray-agent/xray/conf/12_VLESS_SplitHTTP_inbounds.json
+        initXrayXHTTPort
+        initRealityClientServersName
+        initRealityKey
+        cat <<EOF >/etc/v2ray-agent/xray/conf/12_VLESS_XHTTP_inbounds.json
 {
 "inbounds":[
     {
-	  "port": ${splitHTTPort},
+	  "port": ${xHTTPort},
 	  "listen": "0.0.0.0",
 	  "protocol": "vless",
-	  "tag":"VLESSSplit",
+	  "tag":"VLESSRealityXHTTP",
 	  "settings": {
 		"clients": $(initXrayClients 12),
 		"decryption": "none"
 	  },
 	  "streamSettings": {
-		"network": "splithttp",
-		"security": "tls",
-		"splithttpSettings": {
-		  "path": "/${customPath}split",
-		  "host":"${domain}"
-		},
-        "tlsSettings": {
-          "rejectUnknownSni": true,
-          "alpn":[
-            "h2",
-            "http/1.1"
-          ],
-          "certificates": [
-            {
-              "certificateFile": "/etc/v2ray-agent/tls/${domain}.crt",
-              "keyFile": "/etc/v2ray-agent/tls/${domain}.key",
-              "ocspStapling": 3600
-            }
-          ]
+		"network": "xhttp",
+		"security": "reality",
+		"realitySettings": {
+            "show": false,
+            "dest": "${realityServerName}:${realityDomainPort}",
+            "xver": 0,
+            "serverNames": [
+                "${realityServerName}"
+            ],
+            "privateKey": "${realityPrivateKey}",
+            "publicKey": "${realityPublicKey}",
+            "maxTimeDiff": 70000,
+            "shortIds": [
+                "",
+                "6ba85179e30d4fc2"
+            ]
+        },
+        "xhttpSettings": {
+            "host": "${realityServerName}",
+            "path": "/${customPath}xHTTP",
+            "mode": "auto"
         }
 	  }
 	}
@@ -4264,7 +4290,7 @@ EOF
 }
 EOF
     elif [[ -z "$3" ]]; then
-        rm /etc/v2ray-agent/xray/conf/12_VLESS_SplitHTTP_inbounds.json >/dev/null 2>&1
+        rm /etc/v2ray-agent/xray/conf/12_VLESS_XHTTP_inbounds.json >/dev/null 2>&1
     fi
     # trojan_grpc
     if echo "${selectCustomInstallType}" | grep -q ",2," || [[ "$1" == "all" ]]; then
@@ -4643,7 +4669,7 @@ EOF
         echoContent skyBlue "\n开始配置VMess+ws协议端口"
         echo
         mapfile -t result < <(initSingBoxPort "${singBoxVMessWSPort}")
-        echoContent green "\n ---> VLESS_Vision端口：${result[-1]}"
+        echoContent green "\n ---> VMess_ws端口：${result[-1]}"
 
         checkDNSIP "${domain}"
         removeNginxDefaultConf
@@ -4926,8 +4952,8 @@ EOF
         rm /etc/v2ray-agent/sing-box/conf/config/11_VMess_HTTPUpgrade_inbounds.json >/dev/null 2>&1
     fi
     if [[ -z "$3" ]]; then
-        removeSingBoxConfig wireguard_out_IPv4
-        removeSingBoxConfig wireguard_out_IPv6
+        # removeSingBoxConfig wireguard_out_IPv4
+        # removeSingBoxConfig wireguard_out_IPv6
         removeSingBoxConfig wireguard_out_IPv4_route
         removeSingBoxConfig wireguard_out_IPv6_route
         removeSingBoxConfig wireguard_outbound
@@ -5060,20 +5086,22 @@ EOF
         echoContent yellow " ---> 二维码 VLESS(VLESS+WS+TLS)"
         echoContent green "    https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=vless%3A%2F%2F${id}%40${add}%3A${port}%3Fencryption%3Dnone%26security%3Dtls%26type%3Dws%26host%3D${currentHost}%26fp%3Dchrome%26sni%3D${currentHost}%26path%3D${path}%23${email}"
 
-    elif [[ "${type}" == "vlessSplitHTTP" ]]; then
+    elif [[ "${type}" == "vlessXHTTP" ]]; then
 
-        echoContent yellow " ---> 通用格式(VLESS+SplitHTTP+TLS)"
-        echoContent green "    vless://${id}@${add}:${port}?encryption=none&security=tls&type=splithttp&host=${currentHost}&alpn=h3,h2,http/1.1&sni=${currentHost}&fp=chrome&path=${path}#${email}\n"
+        echoContent yellow " ---> 通用格式(VLESS+reality+XHTTP)"
+        echoContent green "    vless://${id}@$(getPublicIP):${port}?encryption=none&security=reality&type=xhttp&sni=${xrayVLESSRealityXHTTPServerName}&host=${xrayVLESSRealityXHTTPServerName}&fp=chrome&path=${path}&pbk=${currentRealityXHTTPPublicKey}&sid=6ba85179e30d4fc2#${email}\n"
 
-        echoContent yellow " ---> 格式化明文(VLESS+WS+TLS)"
-        echoContent green "    协议类型:VLESS，地址:${add}，伪装域名/SNI:${currentHost}，端口:${port}，client-fingerprint: chrome,用户ID:${id}，安全:tls，传输方式:splithttp，alpn:h3,h2,http/1.1,路径:${path}，账户名:${email}\n"
-
+        echoContent yellow " ---> 格式化明文(VLESS+reality+XHTTP)"
+        echoContent green "协议类型:VLESS reality，地址:$(getPublicIP)，publicKey:${currentRealityXHTTPPublicKey}，shortId: 6ba85179e30d4fc2,serverNames：${xrayVLESSRealityXHTTPServerName}，端口:${port}，路径：${path}，SNI:${xrayVLESSRealityXHTTPServerName}，伪装域名:${xrayVLESSRealityXHTTPServerName}，用户ID:${id}，传输方式:xhttp，账户名:${email}\n"
         cat <<EOF >>"/etc/v2ray-agent/subscribe_local/default/${user}"
-vless://${id}@${add}:${port}?encryption=none&security=tls&type=splithttp&host=${currentHost}&sni=${currentHost}&alpn=h3,h2,http/1.1&fp=chrome&path=${path}#${email}
+vless://${id}@$(getPublicIP):${port}?encryption=none&security=reality&type=xhttp&sni=${xrayVLESSRealityXHTTPServerName}&fp=chrome&path=${path}&pbk=${currentRealityXHTTPPublicKey}&sid=6ba85179e30d4fc2#${email}
 EOF
-        echoContent yellow " ---> 二维码 VLESS(VLESS+SplitHTTP+TLS)"
-        echoContent green "    https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=vless%3A%2F%2F${id}%40${add}%3A${port}%3Fencryption%3Dnone%26security%3Dtls%26type%3Dsplithttp%26host%3D${currentHost}%26fp%3Dchrome%26sni%3D${currentHost}%26alpn%3Dh3%2Ch2%2Chttp/1.1%26path%3D${path}%23${email}"
-    elif [[ "${type}" == "vlessgrpc" ]]; then
+        echoContent yellow " ---> 二维码 VLESS(VLESS+reality+XHTTP)"
+        echoContent green "    https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=vless%3A%2F%2F${id}%40$(getPublicIP)%3A${port}%3Fencryption%3Dnone%26security%3Dreality%26type%3Dtcp%26sni%3D${xrayVLESSRealityXHTTPServerName}%26fp%3Dchrome%26path%3D${path}%26host%3D${xrayVLESSRealityXHTTPServerName}%26pbk%3D${currentRealityXHTTPPublicKey}%26sid%3D6ba85179e30d4fc2%23${email}\n"
+
+    elif
+        [[ "${type}" == "vlessgrpc" ]]
+    then
 
         echoContent yellow " ---> 通用格式(VLESS+gRPC+TLS)"
         echoContent green "    vless://${id}@${add}:${port}?encryption=none&security=tls&type=grpc&host=${currentHost}&path=${currentPath}grpc&fp=chrome&serviceName=${currentPath}grpc&alpn=h2&sni=${currentHost}#${email}\n"
@@ -5421,20 +5449,20 @@ showAccounts() {
             done < <(echo "${currentCDNAddress}" | tr ',' '\n')
         done
     fi
-    # VLESS SplitHTTP
+    # VLESS XHTTP
     if echo ${currentInstallProtocolType} | grep -q ",12,"; then
-        echoContent skyBlue "\n================================ VLESS SplitHTTP TLS [仅CDN推荐] ================================\n"
+        echoContent skyBlue "\n================================ VLESS XHTTP TLS [仅CDN推荐] ================================\n"
 
-        jq .inbounds[0].settings.clients//.inbounds[0].users ${configPath}12_VLESS_SplitHTTP_inbounds.json | jq -c '.[]' | while read -r user; do
+        jq .inbounds[0].settings.clients//.inbounds[0].users ${configPath}12_VLESS_XHTTP_inbounds.json | jq -c '.[]' | while read -r user; do
             local email=
             email=$(echo "${user}" | jq -r .email//.name)
 
-            #            local vlessSplitHTTPPort=${xrayVLESSSplitHTTPort}
+            #            local vlessXHTTPPort=${xrayVLESSRealityXHTTPort}
             #            if [[ "${coreInstallType}" == "2" ]]; then
-            #                vlessSplitHTTPPort="${singBoxVLESSWSPort}"
+            #                vlessXHTTPPort="${singBoxVLESSWSPort}"
             #            fi
             echo
-            local path="${currentPath}split"
+            local path="${currentPath}xHTTP"
 
             #            if [[ ${coreInstallType} == "1" ]]; then
             #                path="/${currentPath}ws"
@@ -5446,7 +5474,7 @@ showAccounts() {
             while read -r line; do
                 echoContent skyBlue "\n ---> 账号:${email}${count}"
                 if [[ -n "${line}" ]]; then
-                    defaultBase64Code vlessSplitHTTP "${xrayVLESSSplitHTTPort}" "${email}${count}" "$(echo "${user}" | jq -r .id//.uuid)" "${line}" "${path}"
+                    defaultBase64Code vlessXHTTP "${xrayVLESSRealityXHTTPort}" "${email}${count}" "$(echo "${user}" | jq -r .id//.uuid)" "${line}" "${path}"
                     count=$((count + 1))
                     echo
                 fi
@@ -5656,12 +5684,12 @@ checkNginx302() {
     local domain302Status=
     domain302Status=$(curl -s "https://${currentHost}:${currentPort}")
     if echo "${domain302Status}" | grep -q "302"; then
-        local domain302Result=
-        domain302Result=$(curl -L -s "https://${currentHost}:${currentPort}")
-        if [[ -n "${domain302Result}" ]]; then
-            echoContent green " ---> 302重定向设置完毕"
-            exit 0
-        fi
+        #        local domain302Result=
+        #        domain302Result=$(curl -L -s "https://${currentHost}:${currentPort}")
+        #        if [[ -n "${domain302Result}" ]]; then
+        echoContent green " ---> 302重定向设置完毕"
+        exit 0
+        #        fi
     fi
     echoContent red " ---> 302重定向设置失败，请仔细检查是否和示例相同"
     backupNginxConfig restoreBackup
@@ -6353,8 +6381,8 @@ removeUser() {
             echo "${vmessHTTPUpgradeResult}" | jq . >${configPath}11_VMess_HTTPUpgrade_inbounds.json
         fi
         reloadCore
+        subscribe false
     fi
-    subscribe false
     manageAccount 1
 }
 # 更新脚本
@@ -6604,10 +6632,10 @@ ipv6Routing() {
             if [[ -n "${singBoxConfigPath}" ]]; then
 
                 removeSingBoxConfig IPv4_out
-                removeSingBoxConfig wireguard_out_IPv4
+                # removeSingBoxConfig wireguard_out_IPv4
                 removeSingBoxConfig wireguard_out_IPv4_route
 
-                removeSingBoxConfig wireguard_out_IPv6
+                # removeSingBoxConfig wireguard_out_IPv6
                 removeSingBoxConfig wireguard_out_IPv6_route
 
                 removeSingBoxConfig wireguard_outbound
@@ -6616,7 +6644,10 @@ ipv6Routing() {
 
                 removeSingBoxConfig IPv6_route
 
+                removeSingBoxConfig 01_direct_outbound
+
                 addSingBoxOutbound IPv6_out
+
             fi
 
             echoContent green " ---> IPv6全局出站设置完毕"
@@ -7020,11 +7051,14 @@ addWireGuardRoute() {
     if [[ -n "${singBoxConfigPath}" ]]; then
 
         # rule
-        addSingBoxRouteRule "wireguard_out_${type}" "${domainList}" "wireguard_out_${type}_route"
-        addSingBoxOutbound "wireguard_out_${type}" "wireguard_out"
-        addSingBoxOutbound "01_direct_outbound"
+        addSingBoxRouteRule "wireguard_endpoints_${type}" "${domainList}" "wireguard_endpoints_${type}_route"
+        # addSingBoxOutbound "wireguard_out_${type}" "wireguard_out"
+        if [[ -n "${domainList}" ]]; then
+            addSingBoxOutbound "01_direct_outbound"
+        fi
+
         # outbound
-        addSingBoxWireGuardOut
+        addSingBoxWireGuardEndpoints "${type}"
     fi
 }
 
@@ -7135,27 +7169,28 @@ warpRoutingReg() {
 
             if [[ -n "${singBoxConfigPath}" ]]; then
 
-                removeSingBoxConfig direct
-
                 removeSingBoxConfig IPv4_out
                 removeSingBoxConfig IPv6_out
+                removeSingBoxConfig 01_direct_outbound
 
                 # 删除所有分流规则
-                removeSingBoxConfig wireguard_out_IPv4_route
-                removeSingBoxConfig wireguard_out_IPv6_route
+                removeSingBoxConfig wireguard_endpoints_IPv4_route
+                removeSingBoxConfig wireguard_endpoints_IPv6_route
 
                 removeSingBoxConfig IPv6_route
                 removeSingBoxConfig socks5_inbound_route
 
+                addSingBoxWireGuardEndpoints "${type}"
+                addWireGuardRoute "${type}" outboundTag ""
                 if [[ "${type}" == "IPv4" ]]; then
-                    removeSingBoxConfig wireguard_out_IPv6
+                    removeSingBoxConfig wireguard_endpoints_IPv6
                 else
-                    removeSingBoxConfig wireguard_out_IPv4
+                    removeSingBoxConfig wireguard_endpoints_IPv4
                 fi
 
                 # outbound
-                addSingBoxOutbound "wireguard_out_${type}" "wireguard_out"
-                addSingBoxWireGuardOut
+                # addSingBoxOutbound "wireguard_out_${type}" "wireguard_out"
+
             fi
 
             echoContent green " ---> WARP全局出站设置完毕"
@@ -7173,11 +7208,10 @@ warpRoutingReg() {
         fi
 
         if [[ -n "${singBoxConfigPath}" ]]; then
-            removeSingBoxConfig "wireguard_out_${type}_route"
+            removeSingBoxConfig "wireguard_endpoints_${type}_route"
 
-            removeSingBoxConfig "wireguard_out_${type}"
+            removeSingBoxConfig "wireguard_endpoints_${type}"
             addSingBoxOutbound "01_direct_outbound"
-
         fi
 
         echoContent green " ---> 卸载WARP ${type}分流完毕"
@@ -7269,7 +7303,7 @@ socks5Routing() {
     echoContent red "# 注意事项"
     echoContent yellow "# 流量明文访问"
 
-    echoContent yellow "# 只能用于不会被阻断访问的网络环境下的不同机器之间的流量转发，请不要用于代理访问"
+    echoContent yellow "# 仅限正常网络环境下设备间流量转发，禁止用于代理访问。"
     echoContent yellow "# 使用教程：https://www.v2ray-agent.com/archives/1683226921000#heading-5 \n"
 
     echoContent yellow "1.Socks5出站"
@@ -7394,16 +7428,17 @@ setSocks5OutboundRoutingAll() {
         if [[ -n "${singBoxConfigPath}" ]]; then
 
             removeSingBoxConfig IPv4_out
-            removeSingBoxConfig wireguard_out_IPv4
+            # removeSingBoxConfig wireguard_out_IPv4
             removeSingBoxConfig wireguard_out_IPv4_route
 
             removeSingBoxConfig IPv6_out
-            removeSingBoxConfig wireguard_out_IPv6
+            # removeSingBoxConfig wireguard_out_IPv6
             removeSingBoxConfig wireguard_out_IPv6_route
 
             removeSingBoxConfig wireguard_outbound
 
             removeSingBoxConfig socks5_outbound_route
+            removeSingBoxConfig 01_direct_outbound
         fi
 
         echoContent green " ---> Socks5全局出站设置完毕"
@@ -8136,7 +8171,7 @@ customXrayInstall() {
     echoContent yellow "5.VLESS+TLS+gRPC[仅CDN推荐]"
     echoContent yellow "7.VLESS+Reality+uTLS+Vision[推荐]"
     # echoContent yellow "8.VLESS+Reality+gRPC"
-    echoContent yellow "12.VLESS+SplitHTTP+TLS[仅CDN推荐]"
+    echoContent yellow "12.VLESS+XHTTP+TLS"
     read -r -p "请选择[多选]，[例如:1,2,3]:" selectCustomInstallType
     echoContent skyBlue "--------------------------------------------------------------"
     if echo "${selectCustomInstallType}" | grep -q "，"; then
@@ -8594,7 +8629,7 @@ addOtherSubscribe() {
     read -r -p "请输入域名 端口 机器别名:" remoteSubscribeUrl
     if [[ -z "${remoteSubscribeUrl}" ]]; then
         echoContent red " ---> 不可为空"
-        addSubscribe
+        addOtherSubscribe
     elif ! echo "${remoteSubscribeUrl}" | grep -q ":"; then
         echoContent red " ---> 规则不合法"
     else
@@ -8618,66 +8653,88 @@ clashMetaConfig() {
     local id=$2
     cat <<EOF >"/etc/v2ray-agent/subscribe/clashMetaProfiles/${id}"
 mixed-port: 7890
-unified-delay: false
-geodata-mode: true
-tcp-concurrent: false
-find-process-mode: strict
-global-client-fingerprint: chrome
-
 allow-lan: true
+bind-address: "*"
+lan-allowed-ips:
+  - 0.0.0.0/0
+  - ::/0
+find-process-mode: strict
 mode: rule
-log-level: info
-ipv6: true
-
-external-controller: 127.0.0.1:9090
 
 geox-url:
-  geoip: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat"
-  geosite: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat"
-  mmdb: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb"
+  geoip: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat"
+  geosite: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat"
+  mmdb: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb"
+
+geo-auto-update: true
+geo-update-interval: 24
+
+log-level: debug
+
+ipv6: true
+
+external-controller: 0.0.0.0:9093
+external-controller-tls: 0.0.0.0:9443
+
+external-controller-cors:
+  allow-private-network: true
+
+global-client-fingerprint: chrome
 
 profile:
   store-selected: true
   store-fake-ip: true
 
 sniffer:
-  enable: false
+  enable: true
+  override-destination: false
   sniff:
+    QUIC:
+      ports: [ 443 ]
     TLS:
-      ports: [443]
+      ports: [ 443 ]
     HTTP:
       ports: [80]
-      override-destination: true
 
-tun:
-  enable: true
-  stack: system
-  dns-hijack:
-    - 'any:53'
-  auto-route: true
-  auto-detect-interface: true
 
 dns:
   enable: true
-  listen: 0.0.0.0:1053
+  prefer-h3: false
+  listen: 0.0.0.0:53
   ipv6: true
-  enhanced-mode: fake-ip
-  fake-ip-range: 28.0.0.1/8
-  fake-ip-filter:
-    - '*'
-    - '+.lan'
   default-nameserver:
-    - 223.5.5.5
+    - 114.114.114.114
+    - 119.29.29.29
+    - 8.8.8.8
+    - tls://1.12.12.12:853
+    - tls://223.5.5.5:853
+    - system
+  enhanced-mode: fake-ip
+
+  fake-ip-range: 198.18.0.1/16
+
+  fake-ip-filter:
+    - '*.lan'
+    - "+.local"
+    - "localhost.ptlogin2.qq.com"
+  use-hosts: true
   nameserver:
-    - 'tls://8.8.4.4#DNS_Proxy'
-    - 'tls://1.0.0.1#DNS_Proxy'
-  proxy-server-nameserver:
+    - 114.114.114.114
+    - 8.8.8.8
+    - tls://223.5.5.5:853
+    - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query#h3=true
+    - https://mozilla.cloudflare-dns.com/dns-query#DNS&h3=true
+
+  proxy-server-nameserver:
+    - 'tls://8.8.4.4'
+    - 'tls://1.0.0.1'
+
   nameserver-policy:
     "geosite:cn,private":
-      - 223.5.5.5
-      - 114.114.114.114
-      - https://dns.alidns.com/dns-query#h3=true
+      - https://doh.pub/dns-query
+      - https://dns.alidns.com/dns-query
+    "geosite:category-ads-all": rcode://success
 
 proxy-providers:
   ${subscribeSalt}_provider:
@@ -8685,9 +8742,10 @@ proxy-providers:
     path: ./${subscribeSalt}_provider.yaml
     url: ${url}
     interval: 3600
+    proxy: DIRECT
     health-check:
-      enable: false
-      url: http://www.gstatic.com/generate_204
+      enable: true
+      url: https://cp.cloudflare.com/generate_204
       interval: 300
 
 proxy-groups:
@@ -8839,133 +8897,133 @@ rule-providers:
     type: http
     behavior: classical
     interval: 86400
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Lan/Lan.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Lan/Lan.yaml
     path: ./Rules/lan.yaml
   reject:
     type: http
     behavior: domain
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
     path: ./ruleset/reject.yaml
     interval: 86400
   proxy:
     type: http
     behavior: domain
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt
     path: ./ruleset/proxy.yaml
     interval: 86400
   direct:
     type: http
     behavior: domain
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
     path: ./ruleset/direct.yaml
     interval: 86400
   private:
     type: http
     behavior: domain
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/private.txt
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/private.txt
     path: ./ruleset/private.yaml
     interval: 86400
   gfw:
     type: http
     behavior: domain
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/gfw.txt
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/gfw.txt
     path: ./ruleset/gfw.yaml
     interval: 86400
   greatfire:
     type: http
     behavior: domain
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/greatfire.txt
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/greatfire.txt
     path: ./ruleset/greatfire.yaml
     interval: 86400
   tld-not-cn:
     type: http
     behavior: domain
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/tld-not-cn.txt
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/tld-not-cn.txt
     path: ./ruleset/tld-not-cn.yaml
     interval: 86400
   telegramcidr:
     type: http
     behavior: ipcidr
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/telegramcidr.txt
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/telegramcidr.txt
     path: ./ruleset/telegramcidr.yaml
     interval: 86400
   applications:
     type: http
     behavior: classical
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/applications.txt
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/applications.txt
     path: ./ruleset/applications.yaml
     interval: 86400
   Disney:
     type: http
     behavior: classical
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Disney/Disney.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Disney/Disney.yaml
     path: ./ruleset/disney.yaml
     interval: 86400
   Netflix:
     type: http
     behavior: classical
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Netflix/Netflix.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Netflix/Netflix.yaml
     path: ./ruleset/netflix.yaml
     interval: 86400
   YouTube:
     type: http
     behavior: classical
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.yaml
     path: ./ruleset/youtube.yaml
     interval: 86400
   HBO:
     type: http
     behavior: classical
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/HBO/HBO.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/HBO/HBO.yaml
     path: ./ruleset/hbo.yaml
     interval: 86400
   OpenAI:
     type: http
     behavior: classical
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml
     path: ./ruleset/openai.yaml
     interval: 86400
   ClaudeAI:
     type: http
     behavior: classical
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Claude/Claude.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Claude/Claude.yaml
     path: ./ruleset/claudeai.yaml
     interval: 86400
   Bing:
     type: http
     behavior: classical
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Bing/Bing.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Bing/Bing.yaml
     path: ./ruleset/bing.yaml
     interval: 86400
   Google:
     type: http
     behavior: classical
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Google/Google.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Google/Google.yaml
     path: ./ruleset/google.yaml
     interval: 86400
   GitHub:
     type: http
     behavior: classical
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GitHub/GitHub.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GitHub/GitHub.yaml
     path: ./ruleset/github.yaml
     interval: 86400
   Spotify:
     type: http
     behavior: classical
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Spotify/Spotify.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Spotify/Spotify.yaml
     path: ./ruleset/spotify.yaml
     interval: 86400
   ChinaMaxDomain:
     type: http
     behavior: domain
     interval: 86400
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_Domain.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_Domain.yaml
     path: ./Rules/ChinaMaxDomain.yaml
   ChinaMaxIPNoIPv6:
     type: http
     behavior: ipcidr
     interval: 86400
-    url: https://mirror.ghproxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_IP_No_IPv6.yaml
+    url: https://gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_IP_No_IPv6.yaml
     path: ./Rules/ChinaMaxIPNoIPv6.yaml
 rules:
   - RULE-SET,YouTube,YouTube,no-resolve
@@ -9164,7 +9222,7 @@ updateRemoteSubscribe() {
         fi
         local clashMetaProxies=
 
-        clashMetaProxies=$(curl -s -4 "${subscribeType}://${remoteUrl}/s/clashMeta/${emailMD5}" | sed '/proxies:/d' | sed "s/\"${email}/\"${email}_${serverAlias}/g")
+        clashMetaProxies=$(curl -s "${subscribeType}://${remoteUrl}/s/clashMeta/${emailMD5}" | sed '/proxies:/d' | sed "s/\"${email}/\"${email}_${serverAlias}/g")
 
         if ! echo "${clashMetaProxies}" | grep -q "nginx" && [[ -n "${clashMetaProxies}" ]]; then
             echo "${clashMetaProxies}" >>"/etc/v2ray-agent/subscribe/clashMeta/${emailMD5}"
@@ -9174,7 +9232,7 @@ updateRemoteSubscribe() {
         fi
 
         local default=
-        default=$(curl -s -4 "${subscribeType}://${remoteUrl}/s/default/${emailMD5}")
+        default=$(curl -s "${subscribeType}://${remoteUrl}/s/default/${emailMD5}")
 
         if ! echo "${default}" | grep -q "nginx" && [[ -n "${default}" ]]; then
             default=$(echo "${default}" | base64 -d | sed "s/#${email}/#${email}_${serverAlias}/g")
@@ -9186,7 +9244,7 @@ updateRemoteSubscribe() {
         fi
 
         local singBoxSubscribe=
-        singBoxSubscribe=$(curl -s -4 "${subscribeType}://${remoteUrl}/s/sing-box_profiles/${emailMD5}")
+        singBoxSubscribe=$(curl -s "${subscribeType}://${remoteUrl}/s/sing-box_profiles/${emailMD5}")
 
         if ! echo "${singBoxSubscribe}" | grep -q "nginx" && [[ -n "${singBoxSubscribe}" ]]; then
             singBoxSubscribe=${singBoxSubscribe//tag\": \"${email}/tag\": \"${email}_${serverAlias}}
@@ -9292,7 +9350,7 @@ initRealityDest() {
         realityDestDomain=${domain}:${port}
     else
         local realityDestDomainList=
-        realityDestDomainList="gateway.icloud.com,itunes.apple.com,swdist.apple.com,swcdn.apple.com,updates.cdn-apple.com,mensura.cdn-apple.com,osxapps.itunes.apple.com,aod.itunes.apple.com,download-installer.cdn.mozilla.net,addons.mozilla.org,s0.awsstatic.com,d1.awsstatic.com,images-na.ssl-images-amazon.com,m.media-amazon.com,player.live-video.net,one-piece.com,lol.secure.dyn.riotcdn.net,www.lovelive-anime.jp,www.swift.com,academy.nvidia.com,www.cisco.com,www.samsung.com,www.amd.com,cdn-dynmedia-1.microsoft.com,software.download.prss.microsoft.com,dl.google.com,www.google-analytics.com"
+        realityDestDomainList="gateway.icloud.com,itunes.apple.com,swdist.apple.com,mensura.cdn-apple.com,aod.itunes.apple.com,download-installer.cdn.mozilla.net,addons.mozilla.org,s0.awsstatic.com,d1.awsstatic.com,cdn-dynmedia-1.microsoft.com,images-na.ssl-images-amazon.com,m.media-amazon.com,dl.google.com,www.google-analytics.com,one-piece.com,lol.secure.dyn.riotcdn.net,www.lovelive-anime.jp,www.swift.com,academy.nvidia.com,www.cisco.com,www.samsung.com,www.amd.com,www.python.org,vuejs-jp.org,vuejs.org,zh-hk.vuejs.org,react.dev,www.java.com,www.oracle.com,www.mysql.com,www.mongodb.com,redis.io,cname.vercel-dns.com,vercel-dns.com"
 
         echoContent skyBlue "\n===== 生成配置回落的域名 例如:[addons.mozilla.org:443] ======\n"
         echoContent green "回落域名列表：https://www.v2ray-agent.com/archives/1680104902581#heading-8\n"
@@ -9409,36 +9467,36 @@ initXrayRealityPort() {
     fi
 
 }
-# 初始化SplitHTTP端口
-initXraySplitPort() {
-    if [[ -n "${xrayVLESSSplitHTTPort}" && -z "${lastInstallationConfig}" ]]; then
-        read -r -p "读取到上次安装记录，是否使用上次安装时的端口 ？[y/n]:" historySplitHTTPortStatus
-        if [[ "${historySplitHTTPortStatus}" == "y" ]]; then
-            splitHTTPort=${xrayVLESSSplitHTTPort}
+# 初始化XHTTP端口
+initXrayXHTTPort() {
+    if [[ -n "${xrayVLESSRealityXHTTPort}" && -z "${lastInstallationConfig}" ]]; then
+        read -r -p "读取到上次安装记录，是否使用上次安装时的端口 ？[y/n]:" historyXHTTPortStatus
+        if [[ "${historyXHTTPortStatus}" == "y" ]]; then
+            xHTTPort=${xrayVLESSRealityXHTTPort}
         fi
-    elif [[ -n "${xrayVLESSSplitHTTPort}" && -n "${lastInstallationConfig}" ]]; then
-        splitHTTPort=${xrayVLESSSplitHTTPort}
+    elif [[ -n "${xrayVLESSRealityXHTTPort}" && -n "${lastInstallationConfig}" ]]; then
+        xHTTPort=${xrayVLESSRealityXHTTPort}
     fi
 
-    if [[ -z "${splitHTTPort}" ]]; then
+    if [[ -z "${xHTTPort}" ]]; then
 
         echoContent yellow "请输入端口[回车随机10000-30000]"
-        read -r -p "端口:" splitHTTPort
-        if [[ -z "${splitHTTPort}" ]]; then
-            splitHTTPort=$((RANDOM % 20001 + 10000))
+        read -r -p "端口:" xHTTPort
+        if [[ -z "${xHTTPort}" ]]; then
+            xHTTPort=$((RANDOM % 20001 + 10000))
         fi
-        if [[ -n "${splitHTTPort}" && "${xrayVLESSSplitHTTPort}" == "${splitHTTPort}" ]]; then
+        if [[ -n "${xHTTPort}" && "${xrayVLESSRealityXHTTPort}" == "${xHTTPort}" ]]; then
             handleXray stop
         else
-            checkPort "${splitHTTPort}"
+            checkPort "${xHTTPort}"
         fi
     fi
-    if [[ -z "${splitHTTPort}" ]]; then
-        initXraySplitPort
+    if [[ -z "${xHTTPort}" ]]; then
+        initXrayXHTTPort
     else
-        allowPort "${splitHTTPort}"
-        allowPort "${splitHTTPort}" "udp"
-        echoContent yellow "\n ---> 端口: ${splitHTTPort}"
+        allowPort "${xHTTPort}"
+        allowPort "${xHTTPort}" "udp"
+        echoContent yellow "\n ---> 端口: ${xHTTPort}"
     fi
 }
 # 初始化 reality 配置
@@ -9510,6 +9568,7 @@ manageReality() {
     fi
 
     reloadCore
+    subscribe false
 }
 
 # 安装reality scanner
@@ -9710,7 +9769,7 @@ menu() {
     cd "$HOME" || exit
     echoContent red "\n=============================================================="
     echoContent green "作者：mack-a"
-    echoContent green "当前版本：v3.3.20"
+    echoContent green "当前版本：v3.4.4"
     echoContent green "Github：https://github.com/mack-a/v2ray-agent"
     echoContent green "描述：八合一共存脚本\c"
     showInstallStatus
