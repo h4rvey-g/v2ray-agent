@@ -37,8 +37,8 @@ proxy-groups:
   - name: "auto_xray_only"
     type: url-test
     proxies:
-      - bart
-      - bart_gRPC
+      - lisa
+      - lisa_gRPC
       # - vmiss-jp
       # - vmiss-jp_gRPC
       - bww
@@ -49,11 +49,11 @@ proxy-groups:
   - name: "auto_all"
     type: url-test
     proxies:
-      - bart
+      - lisa
       # - vmiss-jp
       - bww
-      - bart_vision
-      - bart_gRPC
+      - lisa_vision
+      - lisa_gRPC
       # - vmiss-jp_vision
       # - vmiss-jp_gRPC
       - bww_vision
@@ -61,19 +61,19 @@ proxy-groups:
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
     tolerance: 50
-  - name: "bart_all"
+  - name: "lisa_all"
     type: url-test
     proxies:
-      - bart
-      - bart_vision
-      - bart_gRPC
+      - lisa
+      - lisa_vision
+      - lisa_gRPC
     url: "https://cp.cloudflare.com/generate_204"
     interval: 60
     tolerance: 50
   - name: "vision_only"
     type: load-balance
     proxies:
-      - bart_vision
+      - lisa_vision
       # - vmiss-jp_vision
       - bww_vision
     url: "https://cp.cloudflare.com/generate_204"
@@ -182,41 +182,41 @@ dns:
     - "+.mcdn.bilivideo.cn"
     - "*bili*"
 proxies:
-  - name: "bart"
+  - name: "lisa"
     type: vless
-    server: 156.251.130.60
-    port: 20084
-    uuid: 0d96e97a-6ffa-459f-9b51-fd963dfcfba6
+    server: 38.179.82.153
+    port: 23889
+    uuid: e2aac8c2-11d4-4ecc-babe-80717c6387de
     network: tcp
     tls: true
     udp: true
     flow: xtls-rprx-vision
-    servername: "www.lovelive-anime.jp"
+    servername: "player.live-video.net"
     reality-opts:
-      public-key: O5q0G2vl3rwjXfOK_2yfQeqpjUejaoLwwoaFxEOjPmU
+      public-key: RFh5lh7ue4mBMBiXDo0-2J7n7AZ5ZX_z4Xms54q9EAU
     client-fingerprint: chrome
-  - name: "bart_vision"
+  - name: "lisa_vision"
     type: vless
-    server: bart.howiesyu.link
+    server: lisa.howiesyu.link
     port: 443
-    uuid: 0d96e97a-6ffa-459f-9b51-fd963dfcfba6
+    uuid: e2aac8c2-11d4-4ecc-babe-80717c6387de
     network: tcp
     udp: true
     tls: true
     flow: xtls-rprx-vision
     client-fingerprint: chrome
-  - name: "bart_gRPC"
+  - name: "lisa_gRPC"
     type: vless
-    server: 156.251.130.60
-    port: 20084
-    uuid: 0d96e97a-6ffa-459f-9b51-fd963dfcfba6
+    server: 38.179.82.153
+    port: 23889
+    uuid: e2aac8c2-11d4-4ecc-babe-80717c6387de
     network: grpc
     tls: true
-    servername: "www.lovelive-anime.jp"
+    servername: "player.live-video.net"
     grpc-opts:
       grpc-service-name: "grpc"
     reality-opts:
-      public-key: O5q0G2vl3rwjXfOK_2yfQeqpjUejaoLwwoaFxEOjPmU
+      public-key: RFh5lh7ue4mBMBiXDo0-2J7n7AZ5ZX_z4Xms54q9EAU
     client-fingerprint: chrome
   - name: "bww"
     type: vless
@@ -299,10 +299,14 @@ rules:
   - GEOSITE,anthropic,auto_all
   - DOMAIN-SUFFIX,claude.ai,auto_all
   - DOMAIN-SUFFIX,anthropic.com,auto_all
-  - DOMAIN-SUFFIX,learning.google.com,bart_all
+  - DOMAIN-SUFFIX,learning.google.com,lisa_all
   - GEOSITE,category-ads-all,REJECT
   - DOMAIN-SUFFIX,imetyou.top,DIRECT
+  - DOMAIN-SUFFIX,cocoleech.com,DIRECT
+  - DOMAIN-SUFFIX,debrid.it,DIRECT
   ############################# Adobe activation ##################
+  - DOMAIN-SUFFIX,dl.amplesound.net,REJECT
+  - DOMAIN-SUFFIX,d3.amplesound.net,REJECT
   - GEOSITE,adobe-activation,REJECT
   - DOMAIN-SUFFIX,ic.adobe.io,REJECT
   - DOMAIN-SUFFIX,7sj9n87sls.adobe.io,REJECT
@@ -335,12 +339,12 @@ rules:
   - DOMAIN,challenges.cloudflare.com,auto_all
   - DOMAIN-SUFFIX,sourcepower.top,auto_all
   - RULE-SET,gemini,auto_all
-  - DOMAIN-KEYWORD,18comic,bart_all
+  - DOMAIN-KEYWORD,18comic,lisa_all
   - DOMAIN-SUFFIX,kox.moe,vision_only
   - DOMAIN-SUFFIX,remaker.ai,auto_all
   - GEOSITE,openai,bww_gRPC
-  - DOMAIN-SUFFIX,coze.com,bart_all
-  - GEOSITE,paypal,bart_all
+  - DOMAIN-SUFFIX,coze.com,lisa_all
+  - GEOSITE,paypal,lisa_all
   - GEOSITE,category-games@cn,DIRECT
   - GEOSITE,category-entertainment,auto_all
   - GEOSITE,google,auto_xray_only
@@ -350,7 +354,7 @@ rules:
   - DOMAIN-KEYWORD,carbon,auto_xray_only
   - DOMAIN-SUFFIX,usegalaxy.org,DIRECT
   - DOMAIN-SUFFIX,misakaf.org,auto_all
-  - GEOSITE,spotify,bart_all
+  - GEOSITE,spotify,lisa_all
   - DOMAIN-SUFFIX,linuxcontainers.org,auto_xray_only
   - DOMAIN-SUFFIX,sourceforge.net,auto_xray_only
   - GEOSITE,cn,DIRECT
@@ -382,7 +386,7 @@ rules:
   - MATCH,auto_all
 sub-rules:
   sub-browser:
-    - GEOSITE,paypal,bart_all
+    - GEOSITE,paypal,lisa_all
     - GEOSITE,openai,bww_gRPC
     - GEOSITE,github,vision_only
     - GEOSITE,category-entertainment,auto_all
