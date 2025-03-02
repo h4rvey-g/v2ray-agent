@@ -92,25 +92,22 @@ dns:
   # use-hosts: true
   fake-ip-range: 198.18.0.1/16
   default-nameserver:
-    - 8.8.8.8
-    - 1.1.1.1
+    - 223.5.5.5
+    - 223.6.6.6
   nameserver-policy:
     "spcnwikia.top": "https://dns.alidns.com/dns-query"
-    "+.xjtu.edu.cn": "https://dns.alidns.com/dns-query"
-    "geosite:cn":
-      ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"]
     "+.howiesyu.link": "223.5.5.5"
-    "+.closeai.biz": "https://deans.howiesyu.link"
-    "+.fakeopenai.cn": "https://deans.howiesyu.link"
-    "+.acadwrite.cn": "https://deans.howiesyu.link"
-    "geosite:github": "https://deans.howiesyu.link"
-    "detectportal.firefox.com": "https://deans.howiesyu.link"
-    "geosite:openai": "https://deans.howiesyu.link"
-    "geosite:bing": "https://deans.howiesyu.link"
-    "bingapis.com": "https://deans.howiesyu.link"
-    "+.bing.com": "https://deans.howiesyu.link"
-    "geosite:gfw": "https://deans.howiesyu.link"
-    "claude.ai": "https://deans.howiesyu.link"
+    "+.closeai.biz": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
+    "+.fakeopenai.cn": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
+    "+.acadwrite.cn": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
+    "geosite:github": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
+    "detectportal.firefox.com": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
+    "geosite:openai": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
+    "geosite:bing": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
+    "bingapis.com": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
+    "+.bing.com": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
+    "geosite:gfw": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
+    "claude.ai": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
   #  '+.internal.crop.com': '10.0.0.1'
   #  'geosite:cn': https://doh.pub/dns-query
   #  'geosite:geolocation-!cn': [tls://8.8.4.4, https://1.0.0.1/dns-query]
@@ -119,13 +116,16 @@ dns:
   nameserver:
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
+    - 223.5.5.5
+    - 223.5.5.6
   fallback:
     - https://1.1.1.1/dns-query
-    - https://deans.howiesyu.link/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
+    - https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
     - https://max.rethinkdns.com/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
-    - https://sky.rethinkdns.com/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
+    - tls://8.8.8.8:853
+    - tls://1.1.1.1:853
     - 8.8.8.8
-    - 1.1.1.1
+    - 8.8.4.4
   fallback-filter:
     geoip: true
     geoip-code: CN
@@ -137,50 +137,11 @@ dns:
       - "+.youtube.com"
   # 配置不使用 fake-ip 的域名
   fake-ip-filter:
-    - "*.lan"
-    # QQ Loopback
-    - localhost.sec.qq.com
-    - localhost.ptlogin2.qq.com
-    - "+.linksys.com"
-    - "+.pool.ntp.org"
-    # Router
-    - hiwifi.com
-    - leike.cc
-    - miwifi.com
-    - my.router
-    - peiluyou.com
-    - phicomm.me
-    - router.ctc
-    - routerlogin.com
-      # Tenda router
-    - tendawifi.com
-      # TP-Link router
-    - tplinkwifi.net
-      # Windows
-    - “+.msftconnecttest.com”
-    - “+.msftncsi.com”
-    - "dns.msftncsi.com"
-    - "www.msftncsi.com"
-    - "www.msftconnecttest.com"
-      # 中興路由器
-    - zte.home
-      # Stun Services
-    - "+.stun.*.*"
-    - "+.stun.*.*.*"
-    - "+.stun.*.*.*.*"
-    - "+.stun.*.*.*.*.*"
-      # Google Voices
-    - "lens.l.google.com"
-      # Nintendo Switch
-    - "+.srv.nintendo.net"
-      # PlayStation
-    - "+.stun.playstation.net"
-      # XBox
-    - "xbox.*.*.microsoft.com"
-    - "+.xboxlive.com"
-      # Bilibili CDN
-    - "+.mcdn.bilivideo.cn"
-    - "*bili*"
+    - '*.lan'
+    - 'localhost.ptlogin2.qq.com'
+    - 'dns.msftncsi.com'
+    - 'www.msftncsi.com'
+    - 'www.msftconnecttest.com'
 proxies:
   - name: "lisa"
     type: vless
@@ -333,7 +294,6 @@ rules:
   - DOMAIN-SUFFIX,acp-ss-va6c2.adobe.io,REJECT
   - AND,((PROCESS-NAME,Illustrator.exe),(DOMAIN-SUFFIX,adobe.io)),REJECT
   ############################# End Adobe activation ##################
-  - SUB-RULE,(SRC-PORT,10801),sub-browser
   #  - RULE-SET,scholar,XJTU_vpn,no-resolve
   - DOMAIN-SUFFIX,researchgate.net,auto_all
   - DOMAIN,challenges.cloudflare.com,auto_all
@@ -384,11 +344,3 @@ rules:
   - GEOIP,telegram,auto_all,no-resolve
   - GEOIP,LAN,DIRECT,no-resolve
   - MATCH,auto_all
-sub-rules:
-  sub-browser:
-    - GEOSITE,paypal,lisa_all
-    - GEOSITE,openai,bww_gRPC
-    - GEOSITE,github,vision_only
-    - GEOSITE,category-entertainment,auto_all
-    - DOMAIN-SUFFIX,kox.moe,vision_only
-    - MATCH,auto_all
