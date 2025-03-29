@@ -4293,39 +4293,39 @@ EOF
         rm /etc/v2ray-agent/xray/conf/12_VLESS_XHTTP_inbounds.json >/dev/null 2>&1
     fi
     # trojan_grpc
-    if echo "${selectCustomInstallType}" | grep -q ",2," || [[ "$1" == "all" ]]; then
-        if ! echo "${selectCustomInstallType}" | grep -q ",5," && [[ -n ${selectCustomInstallType} ]]; then
-            fallbacksList=${fallbacksList//31302/31304}
-        fi
-        cat <<EOF >/etc/v2ray-agent/xray/conf/04_trojan_gRPC_inbounds.json
-{
-    "inbounds": [
-        {
-            "port": 31304,
-            "listen": "127.0.0.1",
-            "protocol": "trojan",
-            "tag": "trojangRPCTCP",
-            "settings": {
-                "clients": $(initXrayClients 2),
-                "fallbacks": [
-                    {
-                        "dest": "31300"
-                    }
-                ]
-            },
-            "streamSettings": {
-                "network": "grpc",
-                "grpcSettings": {
-                    "serviceName": "${customPath}trojangrpc"
-                }
-            }
-        }
-    ]
-}
-EOF
-    elif [[ -z "$3" ]]; then
-        rm /etc/v2ray-agent/xray/conf/04_trojan_gRPC_inbounds.json >/dev/null 2>&1
-    fi
+    #    if echo "${selectCustomInstallType}" | grep -q ",2," || [[ "$1" == "all" ]]; then
+    #        if ! echo "${selectCustomInstallType}" | grep -q ",5," && [[ -n ${selectCustomInstallType} ]]; then
+    #            fallbacksList=${fallbacksList//31302/31304}
+    #        fi
+    #        cat <<EOF >/etc/v2ray-agent/xray/conf/04_trojan_gRPC_inbounds.json
+    #{
+    #    "inbounds": [
+    #        {
+    #            "port": 31304,
+    #            "listen": "127.0.0.1",
+    #            "protocol": "trojan",
+    #            "tag": "trojangRPCTCP",
+    #            "settings": {
+    #                "clients": $(initXrayClients 2),
+    #                "fallbacks": [
+    #                    {
+    #                        "dest": "31300"
+    #                    }
+    #                ]
+    #            },
+    #            "streamSettings": {
+    #                "network": "grpc",
+    #                "grpcSettings": {
+    #                    "serviceName": "${customPath}trojangrpc"
+    #                }
+    #            }
+    #        }
+    #    ]
+    #}
+    #EOF
+    #    elif [[ -z "$3" ]]; then
+    #        rm /etc/v2ray-agent/xray/conf/04_trojan_gRPC_inbounds.json >/dev/null 2>&1
+    #    fi
 
     # VMess_WS
     if echo "${selectCustomInstallType}" | grep -q ",3," || [[ "$1" == "all" ]]; then
@@ -4356,28 +4356,28 @@ EOF
     elif [[ -z "$3" ]]; then
         rm /etc/v2ray-agent/xray/conf/05_VMess_WS_inbounds.json >/dev/null 2>&1
     fi
-
+    # VLESS_gRPC
     if echo "${selectCustomInstallType}" | grep -q ",5," || [[ "$1" == "all" ]]; then
         cat <<EOF >/etc/v2ray-agent/xray/conf/06_VLESS_gRPC_inbounds.json
 {
     "inbounds":[
-    {
-        "port": 31301,
-        "listen": "127.0.0.1",
-        "protocol": "vless",
-        "tag":"VLESSGRPC",
-        "settings": {
-            "clients": $(initXrayClients 5),
-            "decryption": "none"
-        },
-        "streamSettings": {
-            "network": "grpc",
-            "grpcSettings": {
-                "serviceName": "${customPath}grpc"
+        {
+            "port": 31301,
+            "listen": "127.0.0.1",
+            "protocol": "vless",
+            "tag":"VLESSGRPC",
+            "settings": {
+                "clients": $(initXrayClients 5),
+                "decryption": "none"
+            },
+            "streamSettings": {
+                "network": "grpc",
+                "grpcSettings": {
+                    "serviceName": "${customPath}grpc"
+                }
             }
         }
-    }
-]
+    ]
 }
 EOF
     elif [[ -z "$3" ]]; then
@@ -8130,8 +8130,8 @@ customSingBoxInstall() {
     fi
 
     if [[ "${selectCustomInstallType//,/}" =~ ^[0-9]+$ ]]; then
-        unInstallSubscribe
         readLastInstallationConfig
+        unInstallSubscribe
         totalProgress=9
         installTools 1
         # 申请tls
@@ -8165,7 +8165,7 @@ customXrayInstall() {
     echoContent yellow "VLESS前置，默认安装0，无域名安装Reality只选择7即可"
     echoContent yellow "0.VLESS+TLS_Vision+TCP[推荐]"
     echoContent yellow "1.VLESS+TLS+WS[仅CDN推荐]"
-    echoContent yellow "2.Trojan+TLS+gRPC[仅CDN推荐]"
+    #    echoContent yellow "2.Trojan+TLS+gRPC[仅CDN推荐]"
     echoContent yellow "3.VMess+TLS+WS[仅CDN推荐]"
     echoContent yellow "4.Trojan+TLS[不推荐]"
     echoContent yellow "5.VLESS+TLS+gRPC[仅CDN推荐]"
@@ -8193,10 +8193,6 @@ customXrayInstall() {
         fi
     fi
 
-    #    if [[ "${selectCustomInstallType: -1}" != "," ]]; then
-    #        selectCustomInstallType="${selectCustomInstallType},"
-    #    fi
-    #
     if [[ "${selectCustomInstallType:0:1}" != "," ]]; then
         selectCustomInstallType=",${selectCustomInstallType},"
     fi
@@ -8337,6 +8333,7 @@ xrayCoreInstall() {
 # sing-box 全部安装
 singBoxInstall() {
     readLastInstallationConfig
+    unInstallSubscribe
     checkBTPanel
     check1Panel
     selectCustomInstallType=
@@ -8364,9 +8361,9 @@ singBoxInstall() {
     installCronTLS 8
 
     handleSingBox stop
-    sleep 2
     handleSingBox start
-    unInstallSubscribe
+    handleNginx stop
+    handleNginx start
     # 生成账号
     showAccounts 9
 }
@@ -8700,41 +8697,28 @@ sniffer:
 dns:
   enable: true
   prefer-h3: false
-  listen: 0.0.0.0:53
+  listen: 0.0.0.0:1053
   ipv6: true
-  default-nameserver:
-    - 114.114.114.114
-    - 119.29.29.29
-    - 8.8.8.8
-    - tls://1.12.12.12:853
-    - tls://223.5.5.5:853
-    - system
   enhanced-mode: fake-ip
-
   fake-ip-range: 198.18.0.1/16
-
   fake-ip-filter:
     - '*.lan'
-    - "+.local"
+    - '*.local'
+    - 'dns.google'
     - "localhost.ptlogin2.qq.com"
   use-hosts: true
   nameserver:
-    - 114.114.114.114
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    - 1.1.1.1
     - 8.8.8.8
-    - tls://223.5.5.5:853
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query#h3=true
-    - https://mozilla.cloudflare-dns.com/dns-query#DNS&h3=true
-
   proxy-server-nameserver:
-    - 'tls://8.8.4.4'
-    - 'tls://1.0.0.1'
-
+    - https://223.5.5.5/dns-query
+    - https://1.12.12.12/dns-query
   nameserver-policy:
-    "geosite:cn,private":
-      - https://doh.pub/dns-query
-      - https://dns.alidns.com/dns-query
-    "geosite:category-ads-all": rcode://success
+    geosite:cn:
+      - https://223.5.5.5/dns-query
+      - https://1.12.12.12/dns-query
 
 proxy-providers:
   ${subscribeSalt}_provider:
@@ -9396,14 +9380,19 @@ initRealityClientServersName() {
                         installSubscribe
                         readNginxSubscribe
                         realityDomainPort="${subscribePort}"
+                    else
+                        realityDomainPort="${subscribePort}"
                     fi
                 fi
-
-                if [[ "${selectCoreType}" == "2" && -z "${subscribePort}" ]]; then
-                    echo
-                    installSubscribe
-                    readNginxSubscribe
-                    realityDomainPort="${subscribePort}"
+                if [[ "${selectCoreType}" == "2" ]]; then
+                    if [[ -z "${subscribePort}" ]]; then
+                        echo
+                        installSubscribe
+                        readNginxSubscribe
+                        realityDomainPort="${subscribePort}"
+                    else
+                        realityDomainPort="${subscribePort}"
+                    fi
                 fi
             fi
         fi
@@ -9537,7 +9526,6 @@ xrayCoreRealityInstall() {
     sleep 2
     # 启动
     handleXray start
-    #    unInstallSubscribe
     # 生成账号
     showAccounts 8
 }
@@ -9769,7 +9757,7 @@ menu() {
     cd "$HOME" || exit
     echoContent red "\n=============================================================="
     echoContent green "作者：mack-a"
-    echoContent green "当前版本：v3.4.4"
+    echoContent green "当前版本：v3.4.7"
     echoContent green "Github：https://github.com/mack-a/v2ray-agent"
     echoContent green "描述：八合一共存脚本\c"
     showInstallStatus
