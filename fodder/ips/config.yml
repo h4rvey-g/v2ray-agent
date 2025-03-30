@@ -97,17 +97,17 @@ dns:
   nameserver-policy:
     "spcnwikia.top": "https://dns.alidns.com/dns-query"
     "+.howiesyu.link": "223.5.5.5"
-    "+.closeai.biz": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
-    "+.fakeopenai.cn": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
-    "+.acadwrite.cn": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
-    "geosite:github": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
-    "detectportal.firefox.com": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
-    "geosite:openai": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
-    "geosite:bing": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
-    "bingapis.com": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
-    "+.bing.com": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
-    "geosite:gfw": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
-    "claude.ai": "https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev"
+    "+.closeai.biz": "https://deno.howiesyu.link"
+    "+.fakeopenai.cn": "https://deno.howiesyu.link"
+    "+.acadwrite.cn": "https://deno.howiesyu.link"
+    "geosite:github": "https://deno.howiesyu.link"
+    "detectportal.firefox.com": "https://deno.howiesyu.link"
+    "geosite:openai": "https://deno.howiesyu.link"
+    "geosite:bing": "https://deno.howiesyu.link"
+    "bingapis.com": "https://deno.howiesyu.link"
+    "+.bing.com": "https://deno.howiesyu.link"
+    "geosite:gfw": "https://deno.howiesyu.link"
+    "claude.ai": "https://deno.howiesyu.link"
   #  '+.internal.crop.com': '10.0.0.1'
   #  'geosite:cn': https://doh.pub/dns-query
   #  'geosite:geolocation-!cn': [tls://8.8.4.4, https://1.0.0.1/dns-query]
@@ -120,7 +120,7 @@ dns:
     - 223.5.5.6
   fallback:
     - https://1.1.1.1/dns-query
-    - https://zhonghaoguo-serverless-42-bzd30npq79d2.deno.dev/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
+    - https://deno.howiesyu.link/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
     - https://max.rethinkdns.com/1:-B9_AP_52_8iQazAwBBUMCAAACAAGA==
     - tls://8.8.8.8:853
     - tls://1.1.1.1:853
@@ -261,6 +261,7 @@ rules:
   - DOMAIN-SUFFIX,claude.ai,auto_all
   - DOMAIN-SUFFIX,anthropic.com,auto_all
   - DOMAIN-SUFFIX,learning.google.com,lisa_all
+  - GEOSITE,x,lisa_all
   - GEOSITE,category-ads-all,REJECT
   - DOMAIN-SUFFIX,imetyou.top,DIRECT
   - DOMAIN-SUFFIX,cocoleech.com,DIRECT
